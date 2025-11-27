@@ -34,10 +34,10 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
     /**
      * Create a SingleChoiceListDialogFragment with item checking
      *
-     * @param title
-     * @param items
-     * @param checkedItem
-     * @return
+     * @param title       the title
+     * @param items       the items
+     * @param checkedItem the checked item
+     * @return the single choice list dialog fragment
      */
     public static SingleChoiceListDialogFragment newInstance(CharSequence title, @ArrayRes int items, int checkedItem) {
         SingleChoiceListDialogFragment fragment = new SingleChoiceListDialogFragment();
@@ -51,9 +51,9 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
     /**
      * Create a SingleChoiceListDialogFragment without item checking
      *
-     * @param title
-     * @param items
-     * @return
+     * @param title the title
+     * @param items the items
+     * @return the single choice list dialog fragment
      */
     public static SingleChoiceListDialogFragment newInstance(CharSequence title, @ArrayRes int items) {
         SingleChoiceListDialogFragment fragment = new SingleChoiceListDialogFragment();
@@ -119,9 +119,9 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
 
     private class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
 
-        private LayoutInflater mInflater;
+        private final LayoutInflater mInflater;
 
-        private String[] mItems;
+        private final String[] mItems;
 
         private ItemsAdapter() {
             mInflater = LayoutInflater.from(requireContext());
@@ -148,8 +148,8 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
 
         class ViewHolder extends RecyclerView.ViewHolder {
 
-            private RadioButton mRadioButton;
-            private TextView mText;
+            private final RadioButton mRadioButton;
+            private final TextView mText;
 
             ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -182,9 +182,9 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
 
     protected static class DialogParams implements Parcelable {
         private String tag;
-        private CharSequence title;
-        private int itemsArrayRes;
-        private int checkedItem;
+        private final CharSequence title;
+        private final int itemsArrayRes;
+        private final int checkedItem;
 
         protected DialogParams(CharSequence title, @ArrayRes int itemsArrayRes, int checkedItem) {
             this.title = title;

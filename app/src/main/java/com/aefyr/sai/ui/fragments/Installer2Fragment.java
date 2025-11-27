@@ -24,7 +24,6 @@ import com.aefyr.sai.R;
 import com.aefyr.sai.adapters.SaiPiSessionsAdapter;
 import com.aefyr.sai.ui.dialogs.AppInstalledDialogFragment;
 import com.aefyr.sai.ui.dialogs.DarkLightThemeSelectionDialogFragment;
-import com.aefyr.sai.ui.dialogs.DonationSuggestionDialogFragment;
 import com.aefyr.sai.ui.dialogs.ErrorLogDialogFragment2;
 import com.aefyr.sai.ui.dialogs.FilePickerDialogFragment;
 import com.aefyr.sai.ui.dialogs.InstallationConfirmationDialogFragment;
@@ -96,9 +95,6 @@ public class Installer2Fragment extends InstallerFragment implements FilePickerD
             if (isStateSaved())
                 return;
 
-            if (event.type().equals(InstallerViewModel.EVENT_PACKAGE_INSTALLED))
-                DonationSuggestionDialogFragment.showIfNeeded(requireContext(), getChildFragmentManager());
-
             if (!mHelper.showInstallerDialogs()) {
                 event.consume();
                 return;
@@ -151,7 +147,7 @@ public class Installer2Fragment extends InstallerFragment implements FilePickerD
             });
 
             ToolTip tooltip = new ToolTip.Builder(requireContext(), installButtton, ((ViewGroup) view), getText(R.string.installer_saf_tip), ToolTip.POSITION_ABOVE)
-                    .setBackgroundColor(Utils.getThemeColor(requireContext(), R.attr.colorAccent))
+                    .setBackgroundColor(Utils.getThemeColor(requireContext(), androidx.appcompat.R.attr.colorAccent))
                     .setTextAppearance(R.style.SAITooltipTextAppearance)
                     .setGravity(ToolTip.GRAVITY_CENTER)
                     .build();

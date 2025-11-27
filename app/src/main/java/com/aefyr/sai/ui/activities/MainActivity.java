@@ -12,8 +12,6 @@ import androidx.preference.PreferenceManager;
 
 import com.aefyr.sai.R;
 import com.aefyr.sai.backup2.impl.DefaultBackupManager;
-import com.aefyr.sai.billing.BillingManager;
-import com.aefyr.sai.billing.DefaultBillingManager;
 import com.aefyr.sai.ui.fragments.BackupFragment;
 import com.aefyr.sai.ui.fragments.Installer2Fragment;
 import com.aefyr.sai.ui.fragments.InstallerFragment;
@@ -25,7 +23,8 @@ import com.aefyr.sai.utils.PreferencesHelper;
 import com.aefyr.sai.utils.PreferencesKeys;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends ThemedActivity implements BottomNavigationView.OnNavigationItemSelectedListener, FragmentNavigator.FragmentFactory {
+public class MainActivity extends ThemedActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
+                                                            FragmentNavigator.FragmentFactory {
 
     private BottomNavigationView mBottomNavigationView;
 
@@ -35,14 +34,10 @@ public class MainActivity extends ThemedActivity implements BottomNavigationView
 
     private boolean mIsNavigationEnabled = true;
 
-    private BillingManager mBillingManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mBillingManager = DefaultBillingManager.getInstance(this);
 
         //TODO is this ok?
         DefaultBackupManager.getInstance(this);
@@ -55,8 +50,9 @@ public class MainActivity extends ThemedActivity implements BottomNavigationView
 
         mFragmentNavigator = new FragmentNavigator(savedInstanceState, getSupportFragmentManager(), R.id.container_main, this);
         mInstallerFragment = mFragmentNavigator.findFragmentByTag("installer");
-        if (savedInstanceState == null)
+        if (savedInstanceState == null) {
             mFragmentNavigator.switchTo("installer");
+        }
 
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
@@ -84,7 +80,8 @@ public class MainActivity extends ThemedActivity implements BottomNavigationView
     }
 
     private void showMiuiWarning() {
-        if (MiuiUtils.isMiui() && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesKeys.MIUI_WARNING_SHOWN, false)) {
+        if (MiuiUtils.isMiui() && !PreferenceManager.getDefaultSharedPreferences(this)
+                                                    .getBoolean(PreferencesKeys.MIUI_WARNING_SHOWN, false)) {
             startActivity(new Intent(this, MiActivity.class));
             finish();
         }
@@ -97,23 +94,20 @@ public class MainActivity extends ThemedActivity implements BottomNavigationView
             mBottomNavigationView.getMenu().getItem(i).setEnabled(enabled);
         }
         mBottomNavigationView.animate()
-                .alpha(enabled ? 1f : 0.4f)
-                .setDuration(300)
-                .start();
+                             .alpha(enabled ? 1f : 0.4f)
+                             .setDuration(300)
+                             .start();
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_installer:
-                mFragmentNavigator.switchTo("installer");
-                break;
-            case R.id.menu_backup:
-                mFragmentNavigator.switchTo("backup");
-                break;
-            case R.id.menu_settings:
-                mFragmentNavigator.switchTo("settings");
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_installer) {
+            mFragmentNavigator.switchTo("installer");
+        } else if (itemId == R.id.menu_backup) {
+            mFragmentNavigator.switchTo("backup");
+        } else if (itemId == R.id.menu_settings) {
+            mFragmentNavigator.switchTo("settings");
         }
 
         return true;
@@ -140,14 +134,11 @@ public class MainActivity extends ThemedActivity implements BottomNavigationView
     }
 
     private InstallerFragment getInstallerFragment() {
-        if (mInstallerFragment == null)
-            mInstallerFragment = PreferencesHelper.getInstance(this).useOldInstaller() ? new LegacyInstallerFragment() : new Installer2Fragment();
+        if (mInstallerFragment == null) {
+            mInstallerFragment = PreferencesHelper.getInstance(this).useOldInstaller() ?
+                                 new LegacyInstallerFragment() :
+                                 new Installer2Fragment();
+        }
         return mInstallerFragment;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mBillingManager.refresh();
     }
 }

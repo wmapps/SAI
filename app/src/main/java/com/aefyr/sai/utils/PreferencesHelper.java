@@ -11,7 +11,7 @@ import com.github.angads25.filepicker.model.DialogConfigs;
 public class PreferencesHelper {
     private static PreferencesHelper sInstance;
 
-    private SharedPreferences mPrefs;
+    private final SharedPreferences mPrefs;
 
     public static PreferencesHelper getInstance(Context c) {
         return sInstance != null ? sInstance : new PreferencesHelper(c);
@@ -129,14 +129,6 @@ public class PreferencesHelper {
 
     public boolean isBruteParserEnabled() {
         return mPrefs.getBoolean(PreferencesKeys.USE_BRUTE_PARSER, true);
-    }
-
-    public boolean isAnalyticsEnabled() {
-        return mPrefs.getBoolean(PreferencesKeys.ENABLE_ANALYTICS, true);
-    }
-
-    public void setAnalyticsEnabled(boolean enabled) {
-        mPrefs.edit().putBoolean(PreferencesKeys.ENABLE_ANALYTICS, enabled).apply();
     }
 
     public boolean isInitialIndexingDone() {

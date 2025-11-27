@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aefyr.sai.R;
-import com.aefyr.sai.billing.DonationStatus;
 import com.aefyr.sai.utils.Theme;
 import com.aefyr.sai.view.ThemeView;
 
@@ -18,26 +17,17 @@ import java.util.List;
 public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> {
 
     private List<Theme.ThemeDescriptor> mThemes;
-    private DonationStatus mDonationStatus;
-
-    private Context mContext;
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
 
     private OnThemeInteractionListener mListener;
 
     public ThemeAdapter(Context c) {
-        mContext = c;
         mInflater = LayoutInflater.from(c);
         setHasStableIds(true);
     }
 
     public void setThemes(List<Theme.ThemeDescriptor> themes) {
         mThemes = themes;
-        notifyDataSetChanged();
-    }
-
-    public void setDonationStatus(DonationStatus donationStatus) {
-        mDonationStatus = donationStatus;
         notifyDataSetChanged();
     }
 
@@ -68,7 +58,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ThemeView mThemeView;
+        private final ThemeView mThemeView;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -88,13 +78,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
         private void bindTo(Theme.ThemeDescriptor theme) {
             mThemeView.setTheme(theme);
-
-            if (theme.isDonationRequired() && !mDonationStatus.unlocksThemes()) {
-                mThemeView.setMessage(R.string.donate_donate_only_theme);
-            } else {
-                mThemeView.setMessage(null);
-            }
-
+            mThemeView.setMessage(null);
         }
     }
 

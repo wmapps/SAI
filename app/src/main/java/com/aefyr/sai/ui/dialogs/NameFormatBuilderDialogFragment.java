@@ -24,6 +24,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class NameFormatBuilderDialogFragment extends BaseBottomSheetDialogFragment {
 
@@ -47,12 +48,14 @@ public class NameFormatBuilderDialogFragment extends BaseBottomSheetDialogFragme
 
         String format = requireArguments().getString(EXTRA_FORMAT);
 
-        mViewModel = new ViewModelProvider(this, new NameFormatBuilderViewModel.Factory(requireContext(), format)).get(NameFormatBuilderViewModel.class);
+        mViewModel = new ViewModelProvider(this, new NameFormatBuilderViewModel.Factory(requireContext(), format)).get(
+                NameFormatBuilderViewModel.class);
     }
 
     @Nullable
     @Override
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.dialog_name_format_builder, container, false);
     }
 
@@ -63,7 +66,7 @@ public class NameFormatBuilderDialogFragment extends BaseBottomSheetDialogFragme
 
         getNegativeButton().setOnClickListener((v) -> dismiss());
         getPositiveButton().setOnClickListener((v) -> {
-            deliverFormatAndDismiss(mViewModel.getFormat().getValue().build());
+            deliverFormatAndDismiss(Objects.requireNonNull(mViewModel.getFormat().getValue()).build());
         });
 
         RecyclerView recycler = view.findViewById(R.id.rv_name_builder);
@@ -72,22 +75,31 @@ public class NameFormatBuilderDialogFragment extends BaseBottomSheetDialogFragme
         layoutManager.setJustifyContent(JustifyContent.SPACE_AROUND);
         recycler.setLayoutManager(layoutManager);
 
-        BackupNameFormatBuilderPartsAdapter adapter = new BackupNameFormatBuilderPartsAdapter(mViewModel.getSelection(), this, requireContext());
+        BackupNameFormatBuilderPartsAdapter adapter = new BackupNameFormatBuilderPartsAdapter(mViewModel.getSelection(),
+                                                                                              this,
+                                                                                              requireContext());
         adapter.setData(Arrays.asList(BackupNameFormatBuilder.Part.values()));
         recycler.setAdapter(adapter);
 
         TextView preview = view.findViewById(R.id.tv_name_builder_sample);
 
-        mViewModel.getSelection().asLiveData().observe(this, (selection) -> getPositiveButton().setEnabled(selection.hasSelection()));
-        mViewModel.getFormat().observe(this, (format) -> {
-            preview.setText(format.getParts().isEmpty() ? getString(R.string.name_format_builder_preview_empty) : getString(R.string.name_format_builder_preview, BackupNameFormat.format(format.build(), mViewModel.getOwnMeta())));
-        });
+        mViewModel.getSelection()
+                  .asLiveData()
+                  .observe(this, (selection) -> getPositiveButton().setEnabled(selection.hasSelection()));
+        mViewModel.getFormat()
+                  .observe(this,
+                           (format) -> preview.setText(format.getParts().isEmpty() ?
+                                                       getString(R.string.name_format_builder_preview_empty) :
+                                                       getString(R.string.name_format_builder_preview,
+                                                                 BackupNameFormat.format(format.build(),
+                                                                                         mViewModel.getOwnMeta()))));
     }
 
     private void deliverFormatAndDismiss(String format) {
         OnFormatBuiltListener listener = Utils.getParentAs(this, OnFormatBuiltListener.class);
-        if (listener != null)
+        if (listener != null) {
             listener.onFormatBuilt(getTag(), format);
+        }
 
         dismiss();
     }

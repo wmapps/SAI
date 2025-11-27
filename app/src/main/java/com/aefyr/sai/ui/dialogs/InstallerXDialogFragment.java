@@ -39,7 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment implements FilePickerDialogFragment.OnFilesSelectedListener, SimpleAlertDialogFragment.OnDismissListener {
+public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment implements FilePickerDialogFragment.OnFilesSelectedListener,
+                                                                                       SimpleAlertDialogFragment.OnDismissListener {
     private static final int REQUEST_CODE_GET_FILES = 337;
 
     private static final String ARG_APK_SOURCE_URI = "apk_source_uri";
@@ -60,17 +61,20 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
      * If {@code apkSourceUri} is null, dialog will let user pick apk source file.
      * If {@code uriHostFactoryClass} is null, {@link com.aefyr.sai.installerx.resolver.urimess.impl.AndroidUriHost} will be used.
      *
-     * @param apkSourceUri
-     * @param uriHostFactoryClass
-     * @return
+     * @param apkSourceUri        the apk source uri
+     * @param uriHostFactoryClass the uri host factory class
+     * @return the installer x dialog fragment
      */
-    public static InstallerXDialogFragment newInstance(@Nullable Uri apkSourceUri, @Nullable Class<? extends UriHostFactory> uriHostFactoryClass) {
+    public static InstallerXDialogFragment newInstance(@Nullable Uri apkSourceUri,
+                                                       @Nullable Class<? extends UriHostFactory> uriHostFactoryClass) {
         Bundle args = new Bundle();
-        if (apkSourceUri != null)
+        if (apkSourceUri != null) {
             args.putParcelable(ARG_APK_SOURCE_URI, apkSourceUri);
+        }
 
-        if (uriHostFactoryClass != null)
+        if (uriHostFactoryClass != null) {
             args.putString(ARG_URI_HOST_FACTORY, uriHostFactoryClass.getCanonicalName());
+        }
 
         InstallerXDialogFragment fragment = new InstallerXDialogFragment();
         fragment.setArguments(args);
@@ -96,19 +100,23 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
         }
 
         mHelper = PreferencesHelper.getInstance(requireContext());
-        mViewModel = new ViewModelProvider(this, new InstallerXDialogViewModelFactory(requireContext(), uriHostFactory)).get(InstallerXDialogViewModel.class);
+        mViewModel = new ViewModelProvider(this, new InstallerXDialogViewModelFactory(requireContext(), uriHostFactory)).get(
+                InstallerXDialogViewModel.class);
 
-        if (args == null)
+        if (args == null) {
             return;
+        }
 
         Uri apkSourceUri = args.getParcelable(ARG_APK_SOURCE_URI);
-        if (apkSourceUri != null)
+        if (apkSourceUri != null) {
             mViewModel.setApkSourceUris(Collections.singletonList(apkSourceUri));
+        }
     }
 
     @Nullable
     @Override
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.dialog_installerx, container, false);
     }
 
@@ -177,8 +185,9 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        if (mViewModel.getState().getValue() == InstallerXDialogViewModel.State.LOADING)
+        if (mViewModel.getState().getValue() == InstallerXDialogViewModel.State.LOADING) {
             mViewModel.cancelParsing();
+        }
     }
 
     private void checkPermissionsAndPickFiles() {
@@ -197,13 +206,17 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
         properties.sortBy = mHelper.getFilePickerSortBy();
         properties.sortOrder = mHelper.getFilePickerSortOrder();
 
-        FilePickerDialogFragment.newInstance(null, getString(R.string.installer_pick_apks), properties).show(getChildFragmentManager(), "dialog_files_picker");
+        FilePickerDialogFragment.newInstance(null, getString(R.string.installer_pick_apks), properties)
+                                .show(getChildFragmentManager(), "dialog_files_picker");
     }
 
     private void pickFilesWithSaf(boolean ignorePermissions) {
         if (Utils.apiIsAtLeast(30) && !ignorePermissions) {
             if (requireContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                SimpleAlertDialogFragment.newInstance(requireContext(), R.string.warning, R.string.installerx_thank_you_scoped_storage_very_cool).show(getChildFragmentManager(), DIALOG_TAG_Q_SAF_WARNING);
+                SimpleAlertDialogFragment.newInstance(requireContext(),
+                                                      R.string.warning,
+                                                      R.string.installerx_thank_you_scoped_storage_very_cool)
+                                         .show(getChildFragmentManager(), DIALOG_TAG_Q_SAF_WARNING);
                 return;
             }
         }
@@ -213,7 +226,8 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
         getContentIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         getContentIntent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         getContentIntent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(Intent.createChooser(getContentIntent, getString(R.string.installer_pick_apks)), REQUEST_CODE_GET_FILES);
+        startActivityForResult(Intent.createChooser(getContentIntent, getString(R.string.installer_pick_apks)),
+                               REQUEST_CODE_GET_FILES);
 
     }
 
@@ -226,10 +240,11 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
 
             switch (mActionAfterGettingStoragePermissions) {
                 case PICK_WITH_INTERNAL_FILEPICKER:
-                    if (!permissionsGranted)
+                    if (!permissionsGranted) {
                         AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_storage);
-                    else
+                    } else {
                         checkPermissionsAndPickFiles();
+                    }
                     break;
                 case PICK_WITH_SAF:
                     pickFilesWithSaf(true);
@@ -244,8 +259,9 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_GET_FILES) {
-            if (resultCode != Activity.RESULT_OK || data == null)
+            if (resultCode != Activity.RESULT_OK || data == null) {
                 return;
+            }
 
             if (data.getData() != null) {
                 mViewModel.setApkSourceUris(Collections.singletonList(data.getData()));
@@ -256,8 +272,9 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
                 ClipData clipData = data.getClipData();
                 List<Uri> apkUris = new ArrayList<>(clipData.getItemCount());
 
-                for (int i = 0; i < clipData.getItemCount(); i++)
+                for (int i = 0; i < clipData.getItemCount(); i++) {
                     apkUris.add(clipData.getItemAt(i).getUri());
+                }
 
                 mViewModel.setApkSourceUris(apkUris);
             }
@@ -271,13 +288,11 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
 
     @Override
     public void onDialogDismissed(@NonNull String dialogTag) {
-        switch (dialogTag) {
-            case DIALOG_TAG_Q_SAF_WARNING:
-                mActionAfterGettingStoragePermissions = PICK_WITH_SAF;
-                if (PermissionsUtils.checkAndRequestStoragePermissions(this)) {
-                    pickFilesWithSaf(false);
-                }
-                break;
+        if (dialogTag.equals(DIALOG_TAG_Q_SAF_WARNING)) {
+            mActionAfterGettingStoragePermissions = PICK_WITH_SAF;
+            if (PermissionsUtils.checkAndRequestStoragePermissions(this)) {
+                pickFilesWithSaf(false);
+            }
         }
     }
 }

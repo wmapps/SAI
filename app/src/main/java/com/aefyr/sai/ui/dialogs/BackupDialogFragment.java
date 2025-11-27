@@ -24,7 +24,6 @@ import java.util.Objects;
 public class BackupDialogFragment extends BaseBottomSheetDialogFragment {
     private static final String ARG_PACKAGE = "package";
 
-    private PackageMeta mPackage;
     private BackupDialogViewModel mViewModel;
 
     public static BackupDialogFragment newInstance(PackageMeta packageMeta) {
@@ -43,16 +42,19 @@ public class BackupDialogFragment extends BaseBottomSheetDialogFragment {
         mViewModel = new ViewModelProvider(this).get(BackupDialogViewModel.class);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
-        mPackage = Objects.requireNonNull(args.getParcelable(ARG_PACKAGE));
+        }
+        final PackageMeta currentPackage = Objects.requireNonNull(args.getParcelable(ARG_PACKAGE));
 
-        if (savedInstanceState == null)
-            mViewModel.setPackage(mPackage);
+        if (savedInstanceState == null) {
+            mViewModel.setPackage(currentPackage);
+        }
     }
 
     @Override
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.dialog_backup, container, false);
     }
 
@@ -105,9 +107,8 @@ public class BackupDialogFragment extends BaseBottomSheetDialogFragment {
         ViewGroup apkExportContainer = view.findViewById(R.id.container_backup_dialog_apk_export);
         Switch apkExportSwitch = view.findViewById(R.id.switch_backup_dialog_apk_export);
 
-        apkExportContainer.setOnClickListener(v -> {
-            mViewModel.setApkExportEnabled(!mViewModel.getIsApkExportEnabled().getValue());
-        });
+        apkExportContainer.setOnClickListener(v -> mViewModel.setApkExportEnabled(Boolean.FALSE.equals(mViewModel.getIsApkExportEnabled()
+                                                                                                                 .getValue())));
 
         mViewModel.getIsApkExportOptionAvailable().observe(this, available -> {
             apkExportContainer.setVisibility(available ? View.VISIBLE : View.GONE);

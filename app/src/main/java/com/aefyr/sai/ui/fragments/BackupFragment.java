@@ -32,7 +32,6 @@ import com.aefyr.sai.backup2.BackupApp;
 import com.aefyr.sai.ui.activities.BackupManageAppActivity;
 import com.aefyr.sai.ui.activities.BackupSettingsActivity;
 import com.aefyr.sai.ui.dialogs.BatchBackupDialogFragment;
-import com.aefyr.sai.ui.dialogs.DonationSuggestionDialogFragment;
 import com.aefyr.sai.ui.dialogs.OneTimeWarningDialogFragment;
 import com.aefyr.sai.ui.dialogs.SimpleAlertDialogFragment;
 import com.aefyr.sai.ui.recycler.RecyclerPaddingDecoration;
@@ -45,7 +44,10 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
-public class BackupFragment extends SaiBaseFragment implements BackupPackagesAdapter.OnItemInteractionListener, FilterDialog.OnApplyConfigListener, SharedPreferences.OnSharedPreferenceChangeListener, BatchBackupDialogFragment.OnBatchBackupEnqueuedListener {
+public class BackupFragment extends SaiBaseFragment implements BackupPackagesAdapter.OnItemInteractionListener,
+                                                               FilterDialog.OnApplyConfigListener,
+                                                               SharedPreferences.OnSharedPreferenceChangeListener,
+                                                               BatchBackupDialogFragment.OnBatchBackupEnqueuedListener {
 
     private static final String FRAGMENT_TAG_DEFAULT_STORAGE_SETUP = "default_storage_setup";
 
@@ -84,9 +86,12 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
         findViewById(R.id.button_backup_action).setOnClickListener(v -> {
             Selection<String> selection = mViewModel.getSelection();
             if (!selection.hasSelection()) {
-                FilterDialog.newInstance(getString(R.string.backup_filter), mViewModel.getRawFilterConfig(), DefaultFilterConfigViewHolderFactory.class).show(getChildFragmentManager(), null);
+                FilterDialog.newInstance(getString(R.string.backup_filter),
+                                         mViewModel.getRawFilterConfig(),
+                                         DefaultFilterConfigViewHolderFactory.class).show(getChildFragmentManager(), null);
             } else {
-                BatchBackupDialogFragment.newInstance(new ArrayList<>(mViewModel.getSelection().getSelectedKeys())).show(getChildFragmentManager(), null);
+                BatchBackupDialogFragment.newInstance(new ArrayList<>(mViewModel.getSelection().getSelectedKeys()))
+                                         .show(getChildFragmentManager(), null);
             }
         });
 
@@ -117,13 +122,17 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
                 if (mStorageConfigFragment != null) {
                     getChildFragmentManager().beginTransaction()
-                            .remove(mStorageConfigFragment)
-                            .commitNow();
+                                             .remove(mStorageConfigFragment)
+                                             .commitNow();
 
                     mStorageConfigFragment = null;
                 }
 
-                OneTimeWarningDialogFragment.showIfNeeded(requireContext(), getChildFragmentManager(), R.string.help, R.string.backup_warning, "backup_faq");
+                OneTimeWarningDialogFragment.showIfNeeded(requireContext(),
+                                                          getChildFragmentManager(),
+                                                          R.string.help,
+                                                          R.string.backup_warning,
+                                                          "backup_faq");
             } else {
                 storageConfigOverlay.setVisibility(View.VISIBLE);
 
@@ -131,8 +140,10 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
                     mStorageConfigFragment = mViewModel.getDefaultStorageProvider().createSetupFragment();
 
                     getChildFragmentManager().beginTransaction()
-                            .add(R.id.fragment_container_backup_storage_setup, mStorageConfigFragment, FRAGMENT_TAG_DEFAULT_STORAGE_SETUP)
-                            .commitNow();
+                                             .add(R.id.fragment_container_backup_storage_setup,
+                                                  mStorageConfigFragment,
+                                                  FRAGMENT_TAG_DEFAULT_STORAGE_SETUP)
+                                             .commitNow();
                 }
             }
         });
@@ -171,8 +182,9 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (mViewStateRestored)
+                if (mViewStateRestored) {
                     mViewModel.search(s.toString());
+                }
             }
         });
 
@@ -181,19 +193,16 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
             popupMenu.getMenuInflater().inflate(R.menu.backup_fragment, popupMenu.getMenu());
 
             popupMenu.setOnMenuItemClickListener((menuItem) -> {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_export_all_split_apks:
-                        exportAllSplitApks();
-                        break;
-                    case R.id.menu_backup_help:
-                        SimpleAlertDialogFragment.newInstance(requireContext(), R.string.help, R.string.backup_warning).show(getChildFragmentManager(), null);
-                        break;
-                    case R.id.menu_backup_reindex:
-                        mViewModel.reindexBackups();
-                        break;
-                    case R.id.menu_backup_settings:
-                        startActivity(new Intent(requireContext(), BackupSettingsActivity.class));
-                        break;
+                int itemId = menuItem.getItemId();
+                if (itemId == R.id.menu_export_all_split_apks) {
+                    exportAllSplitApks();
+                } else if (itemId == R.id.menu_backup_help) {
+                    SimpleAlertDialogFragment.newInstance(requireContext(), R.string.help, R.string.backup_warning)
+                                             .show(getChildFragmentManager(), null);
+                } else if (itemId == R.id.menu_backup_reindex) {
+                    mViewModel.reindexBackups();
+                } else if (itemId == R.id.menu_backup_settings) {
+                    startActivity(new Intent(requireContext(), BackupSettingsActivity.class));
                 }
                 return true;
             });
@@ -203,8 +212,9 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
         //Selection
         findViewById(R.id.ib_backup_toolbar_action).setOnClickListener(v -> {
-            if (mViewModel.getSelection().hasSelection())
+            if (mViewModel.getSelection().hasSelection()) {
                 mViewModel.getSelection().clear();
+            }
         });
         findViewById(R.id.ib_backup_select_all).setOnClickListener(v -> mViewModel.selectAllApps());
 
@@ -229,14 +239,14 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
                 toolbarActionButton.setClickable(true);
                 toolbarActionButton.setImageResource(R.drawable.ic_clear_selection);
-                toolbarActionButton.setColorFilter(Utils.getThemeColor(requireContext(), R.attr.colorAccent));
+                toolbarActionButton.setColorFilter(Utils.getThemeColor(requireContext(), androidx.appcompat.R.attr.colorAccent));
 
                 mSearchBarScrollResponsePaused = true;
                 mSearchBarOffset = 0;
                 mSearchBar.animate()
-                        .setDuration(200)
-                        .translationY(mSearchBarOffset)
-                        .start();
+                          .setDuration(200)
+                          .translationY(mSearchBarOffset)
+                          .start();
             } else {
                 searchBarContainer.setVisibility(View.VISIBLE);
                 selectionBarContainer.setVisibility(View.GONE);
@@ -261,13 +271,15 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    if (mSearchBarScrollResponsePaused)
+                    if (mSearchBarScrollResponsePaused) {
                         return;
+                    }
 
-                    if (dy == 0)
+                    if (dy == 0) {
                         mSearchBarOffset = 0;
-                    else
+                    } else {
                         mSearchBarOffset = MathUtils.clamp(mSearchBarOffset - dy, -mSearchBar.getHeight(), 0);
+                    }
 
                     mSearchBar.setTranslationY(mSearchBarOffset);
                 }
@@ -275,11 +287,16 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        if (mSearchBarScrollResponsePaused)
+                        if (mSearchBarScrollResponsePaused) {
                             return;
+                        }
 
-                        if (mSearchBarOffset != 0 && mSearchBarOffset != -mSearchBar.getHeight())
-                            recyclerView.smoothScrollBy(0, mSearchBarOffset - MathUtils.closest(mSearchBarOffset, 0, -mSearchBar.getHeight()));
+                        if (mSearchBarOffset != 0 && mSearchBarOffset != -mSearchBar.getHeight()) {
+                            recyclerView.smoothScrollBy(0,
+                                                        mSearchBarOffset - MathUtils.closest(mSearchBarOffset,
+                                                                                             0,
+                                                                                             -mSearchBar.getHeight()));
+                        }
                     }
 
                 }
@@ -309,7 +326,8 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
     private void invalidateAppFeaturesVisibility() {
         if (PreferencesHelper.getInstance(requireContext()).shouldShowAppFeatures()) {
-            mViewModel.getBackupFilterConfig().observe(getViewLifecycleOwner(), config -> mAdapter.setFilterConfig(config, false));
+            mViewModel.getBackupFilterConfig()
+                      .observe(getViewLifecycleOwner(), config -> mAdapter.setFilterConfig(config, false));
             mAdapter.setFilterConfig(mViewModel.getBackupFilterConfig().getValue(), true);
         } else {
             mViewModel.getBackupFilterConfig().removeObservers(getViewLifecycleOwner());
@@ -329,15 +347,17 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
 
     @Override
     public void onItemFocusChanged(boolean hasFocus, int index, BackupApp backupApp) {
-        if (hasFocus)
+        if (hasFocus) {
             mFocusedItemIndex = index;
+        }
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (hidden)
+        if (hidden) {
             Utils.hideKeyboard(this);
+        }
     }
 
     @Override
@@ -355,6 +375,5 @@ public class BackupFragment extends SaiBaseFragment implements BackupPackagesAda
     @Override
     public void onBatchBackupEnqueued(@Nullable String dialogTag) {
         mViewModel.getSelection().clear();
-        DonationSuggestionDialogFragment.showIfNeeded(requireContext(), getChildFragmentManager());
     }
 }

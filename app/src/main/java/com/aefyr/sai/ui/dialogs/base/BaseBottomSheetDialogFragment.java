@@ -49,7 +49,8 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     @Nullable
     @Override
-    public final View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public final View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                                   @Nullable Bundle savedInstanceState) {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -59,7 +60,8 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
     }
 
     @Nullable
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         return null;
     }
 
@@ -84,7 +86,7 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
     }
 
     protected void revealBottomSheet() {
-        FrameLayout bottomSheet = mDialog.findViewById(R.id.design_bottom_sheet);
+        FrameLayout bottomSheet = mDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
@@ -94,11 +96,13 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
         super.onDismiss(dialog);
 
         Object parent = getParentFragment();
-        if (parent == null)
+        if (parent == null) {
             parent = requireActivity();
+        }
 
-        if (parent instanceof OnDismissListener && getTag() != null)
+        if (parent instanceof OnDismissListener && getTag() != null) {
             ((OnDismissListener) parent).onDialogDismissed(getTag());
+        }
 
     }
 

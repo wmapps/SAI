@@ -9,8 +9,6 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.aefyr.sai.utils.Logs;
-
 import java.util.Objects;
 
 public class FlavorInitProvider extends ContentProvider {
@@ -22,7 +20,6 @@ public class FlavorInitProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Logs.init(compatRequireContext());
         return true;
     }
 
