@@ -1,6 +1,5 @@
 package com.aefyr.sai.backup2.backuptask.executor;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 
@@ -20,29 +19,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BatchBackupTaskExecutor implements CancellableBackupTaskExecutor {
 
-    private Context mContext;
-    private BatchBackupTaskConfig mConfig;
-    private SingleBackupTaskExecutorFactory mSingleBackupTaskExecutorFactory;
+    private final SingleBackupTaskExecutorFactory mSingleBackupTaskExecutorFactory;
 
-    private Stack<SingleBackupTaskConfig> mRemainingConfigs;
+    private final Stack<SingleBackupTaskConfig> mRemainingConfigs;
 
     private HandlerThread mWorkerHandlerThread;
     private Handler mWorkerHandler;
-    private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private Listener mListener;
     private Handler mListenerHandler;
 
-    private AtomicBoolean mIsStarted = new AtomicBoolean(false);
-    private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
+    private final AtomicBoolean mIsStarted = new AtomicBoolean(false);
+    private final AtomicBoolean mIsCancelled = new AtomicBoolean(false);
 
-    public BatchBackupTaskExecutor(Context context, BatchBackupTaskConfig config, SingleBackupTaskExecutorFactory singleBackupTaskExecutorFactory) {
-        mContext = context.getApplicationContext();
-        mConfig = config;
+    public BatchBackupTaskExecutor(BatchBackupTaskConfig config,
+                                   SingleBackupTaskExecutorFactory singleBackupTaskExecutorFactory) {
         mSingleBackupTaskExecutorFactory = singleBackupTaskExecutorFactory;
 
         mRemainingConfigs = new Stack<>();
-        mRemainingConfigs.addAll(mConfig.configs());
+        mRemainingConfigs.addAll(config.configs());
     }
 
     public void setListener(Listener listener, Handler listenerHandler) {
@@ -56,8 +52,9 @@ public class BatchBackupTaskExecutor implements CancellableBackupTaskExecutor {
     }
 
     public void execute() {
-        if (mIsStarted.getAndSet(true))
+        if (mIsStarted.getAndSet(true)) {
             throw new IllegalStateException("Unable to perform this action after execute has been called");
+        }
 
         mWorkerHandlerThread = new HandlerThread("BatchBackupTaskExecutor.Worker");
         mWorkerHandlerThread.start();
@@ -83,7 +80,8 @@ public class BatchBackupTaskExecutor implements CancellableBackupTaskExecutor {
         SingleBackupTaskConfig config = mRemainingConfigs.pop();
 
         if (config.exportMode()) {
-            notifyAppBackupFailed(config, new IllegalArgumentException("exportMode is true, but that's not allowed for batch backups"));
+            notifyAppBackupFailed(config,
+                                  new IllegalArgumentException("exportMode is true, but that's not allowed for batch backups"));
             mWorkerHandler.post(this::nextTask);
             return;
         }
@@ -126,38 +124,46 @@ public class BatchBackupTaskExecutor implements CancellableBackupTaskExecutor {
     }
 
     private void notifyStarted() {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onStart());
+        }
     }
 
     private void notifyAppBackupStarted(SingleBackupTaskConfig config) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onAppBackupStarted(config));
+        }
     }
 
     private void notifyAppBackedUp(SingleBackupTaskConfig config, Backup backup) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onAppBackedUp(config, backup));
+        }
     }
 
     private void notifyAppBackupFailed(SingleBackupTaskConfig config, Exception e) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onAppBackupFailed(config, e));
+        }
     }
 
     protected void notifyCancelled(List<SingleBackupTaskConfig> cancelledBackups) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onCancelled(cancelledBackups));
+        }
     }
 
     private void notifySucceeded() {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onSuccess());
+        }
     }
 
+    @SuppressWarnings("unused")
     protected void notifyFailed(Exception e, List<SingleBackupTaskConfig> remainingBackups) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onError(e, remainingBackups));
+        }
     }
 
     public interface Listener {

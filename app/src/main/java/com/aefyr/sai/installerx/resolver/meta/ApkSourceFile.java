@@ -8,23 +8,24 @@ public interface ApkSourceFile extends AutoCloseable {
     /**
      * List entries in this ApkSourceFile
      *
-     * @return
-     * @throws Exception
+     * @return the list
+     * @throws Exception the exception
      */
     List<Entry> listEntries() throws Exception;
 
     /**
      * Open an input stream for the given entry
      *
-     * @return
-     * @throws Exception
+     * @param entry the entry
+     * @return the input stream
+     * @throws Exception the exception
      */
     InputStream openEntryInputStream(Entry entry) throws Exception;
 
     /**
      * Get name of this ApkSourceFile
      *
-     * @return
+     * @return the name
      */
     String getName();
 
@@ -34,9 +35,9 @@ public interface ApkSourceFile extends AutoCloseable {
     }
 
     class Entry {
-        private String mName;
-        private String mLocalPath;
-        private long mSize;
+        private final String mName;
+        private final String mLocalPath;
+        private final long mSize;
 
         public Entry(String name, String localPath, long size) {
             mName = name;

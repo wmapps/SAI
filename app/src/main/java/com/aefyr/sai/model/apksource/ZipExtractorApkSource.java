@@ -23,14 +23,14 @@ import java.util.zip.ZipInputStream;
  */
 @Deprecated
 public class ZipExtractorApkSource implements ApkSource {
-    private Context mContext;
-    private FileDescriptor mZipFileDescriptor;
+    private final Context mContext;
+    private final FileDescriptor mZipFileDescriptor;
     private boolean mIsOpen;
     private int mSeenApkFiles = 0;
 
     private ZipInputStream mZipInputStream;
     private ZipEntry mCurrentZipEntry;
-    private File mExtractedFilesDir;
+    private final File mExtractedFilesDir;
     private File mCurrentExtractedZipEntryFile;
 
     public ZipExtractorApkSource(Context c, FileDescriptor zipFileDescriptor) {
@@ -57,8 +57,9 @@ public class ZipExtractorApkSource implements ApkSource {
         if (mCurrentZipEntry == null) {
             mZipInputStream.close();
 
-            if (mSeenApkFiles == 0)
+            if (mSeenApkFiles == 0) {
                 throw new IllegalArgumentException(mContext.getString(R.string.installer_error_zip_contains_no_apks));
+            }
 
             return false;
         }

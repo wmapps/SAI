@@ -17,8 +17,8 @@ public class NotificationHelper {
 
     private static NotificationHelper sInstance;
 
-    private NotificationManagerCompat mNotificationManager;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final NotificationManagerCompat mNotificationManager;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private long mLastNotificationTime = 0;
 
@@ -57,7 +57,8 @@ public class NotificationHelper {
 
         if (timeSinceLastNotification < NOTIFICATION_CD) {
             if (!skipable) {
-                mHandler.postAtTime(() -> mNotificationManager.notify(tag, id, notification), mLastNotificationTime + NOTIFICATION_CD);
+                mHandler.postAtTime(() -> mNotificationManager.notify(tag, id, notification),
+                                    mLastNotificationTime + NOTIFICATION_CD);
                 mLastNotificationTime = mLastNotificationTime + NOTIFICATION_CD;
             }
             return;

@@ -21,24 +21,26 @@ public class MiEntryViewModel extends AndroidViewModel {
     private ScheduledFuture mTimerScheduledFuture;
 
     private int mCountdown = CONTINUE_DELAY_SECONDS;
-    private MutableLiveData<Integer> mCountdownLiveData = new MutableLiveData<>(CONTINUE_DELAY_SECONDS);
+    private final MutableLiveData<Integer> mCountdownLiveData = new MutableLiveData<>(CONTINUE_DELAY_SECONDS);
 
-    private AtomicBoolean mPaused = new AtomicBoolean(false);
+    private final AtomicBoolean mPaused = new AtomicBoolean(false);
 
     public MiEntryViewModel(@NonNull Application application) {
         super(application);
 
         if (!MiuiUtils.isFixedMiui()) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            mTimerScheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-                if (mPaused.get())
+            mTimerScheduledFuture = scheduler.scheduleWithFixedDelay(() -> {
+                if (mPaused.get()) {
                     return;
+                }
 
                 mCountdown--;
                 mCountdownLiveData.postValue(mCountdown);
 
-                if (mCountdown == 0)
+                if (mCountdown == 0) {
                     mTimerScheduledFuture.cancel(false);
+                }
 
             }, 0, 1, TimeUnit.SECONDS);
         } else {
@@ -57,7 +59,8 @@ public class MiEntryViewModel extends AndroidViewModel {
 
     @Override
     protected void onCleared() {
-        if (mTimerScheduledFuture != null)
+        if (mTimerScheduledFuture != null) {
             mTimerScheduledFuture.cancel(false);
+        }
     }
 }

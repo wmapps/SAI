@@ -13,20 +13,15 @@ import com.aefyr.sai.backup2.impl.DefaultBackupManager;
 
 public class BackupManageAppViewModel extends ViewModel {
 
-    private Context mContext;
-    private String mPackage;
+    private final String mPackage;
 
-    private BackupManager mBackupManager;
-
-    private LiveData<BackupAppDetails> mDetailsLiveData;
+    private final LiveData<BackupAppDetails> mDetailsLiveData;
 
     public BackupManageAppViewModel(Context appContext, String pkg) {
-        mContext = appContext;
         mPackage = pkg;
 
-        mBackupManager = DefaultBackupManager.getInstance(mContext);
-
-        mDetailsLiveData = mBackupManager.getAppDetails(pkg);
+        final BackupManager backupManager = DefaultBackupManager.getInstance(appContext);
+        mDetailsLiveData = backupManager.getAppDetails(pkg);
     }
 
     public LiveData<BackupAppDetails> getDetails() {
@@ -40,11 +35,13 @@ public class BackupManageAppViewModel extends ViewModel {
     @Nullable
     public Backup getLatestBackup() {
         BackupAppDetails details = mDetailsLiveData.getValue();
-        if (details == null)
+        if (details == null) {
             return null;
+        }
 
-        if (details.backups().size() > 0)
+        if (!details.backups().isEmpty()) {
             return details.backups().get(0);
+        }
 
         return null;
     }

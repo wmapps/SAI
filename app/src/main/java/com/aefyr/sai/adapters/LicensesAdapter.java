@@ -16,7 +16,7 @@ import java.util.List;
 
 public class LicensesAdapter extends RecyclerView.Adapter<LicensesAdapter.ViewHolder> {
 
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
 
     private List<License> mLicenses;
 
@@ -45,10 +45,10 @@ public class LicensesAdapter extends RecyclerView.Adapter<LicensesAdapter.ViewHo
         return mLicenses == null ? 0 : mLicenses.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mSubject;
-        private TextView mText;
+        private final TextView mSubject;
+        private final TextView mText;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);

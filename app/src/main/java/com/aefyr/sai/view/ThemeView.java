@@ -42,20 +42,23 @@ public class ThemeView extends MaterialCardView {
     private void init() {
         LinearLayoutCompat container = new LinearLayoutCompat(getContext());
         container.setOrientation(LinearLayoutCompat.VERTICAL);
-        MaterialCardView.LayoutParams containerLayoutParams = new MaterialCardView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        MaterialCardView.LayoutParams containerLayoutParams = new MaterialCardView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                                                ViewGroup.LayoutParams.WRAP_CONTENT);
         containerLayoutParams.gravity = Gravity.CENTER;
         addView(container, containerLayoutParams);
 
         mThemeTitle = new AppCompatTextView(getContext());
         mThemeTitle.setGravity(Gravity.CENTER);
         mThemeTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        LinearLayoutCompat.LayoutParams titleLayoutParams = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayoutCompat.LayoutParams titleLayoutParams = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                                                ViewGroup.LayoutParams.WRAP_CONTENT);
         container.addView(mThemeTitle, titleLayoutParams);
 
         mThemeMessage = new AppCompatTextView(getContext());
         mThemeMessage.setGravity(Gravity.CENTER);
         mThemeMessage.setVisibility(GONE);
-        LinearLayoutCompat.LayoutParams messageLayoutParams = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayoutCompat.LayoutParams messageLayoutParams = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                                                  ViewGroup.LayoutParams.WRAP_CONTENT);
         container.addView(mThemeMessage, messageLayoutParams);
     }
 

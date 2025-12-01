@@ -1,17 +1,13 @@
 package com.aefyr.sai.installer;
 
-import android.content.Context;
-
 import com.aefyr.sai.model.apksource.ApkSource;
 
 public class QueuedInstallation {
 
-    private Context mContext;
-    private ApkSource mApkSource;
-    private long mId;
+    private final ApkSource mApkSource;
+    private final long mId;
 
-    QueuedInstallation(Context c, ApkSource apkSource, long id) {
-        mContext = c;
+    QueuedInstallation(ApkSource apkSource, long id) {
         mApkSource = apkSource;
         mId = id;
     }

@@ -20,7 +20,8 @@ import com.aefyr.sai.utils.BackupNameFormat;
 
 import java.util.Objects;
 
-public class LocalBackupStorageSettingsFragment extends PreferenceFragmentCompat implements UriDirectoryPickerDialogFragment.OnDirectoryPickedListener, NameFormatBuilderDialogFragment.OnFormatBuiltListener {
+public class LocalBackupStorageSettingsFragment extends PreferenceFragmentCompat implements UriDirectoryPickerDialogFragment.OnDirectoryPickedListener,
+                                                                                            NameFormatBuilderDialogFragment.OnFormatBuiltListener {
 
     private Preference mBackupNameFormatPref;
     private Preference mBackupDirPref;
@@ -53,7 +54,8 @@ public class LocalBackupStorageSettingsFragment extends PreferenceFragmentCompat
         mBackupNameFormatPref = findPreference("backup_file_name_format");
         updateBackupNameFormatSummary();
         mBackupNameFormatPref.setOnPreferenceClickListener((p) -> {
-            NameFormatBuilderDialogFragment.newInstance(mProvider.getBackupNameFormat()).show(getChildFragmentManager(), "backup_name_format_builder");
+            NameFormatBuilderDialogFragment.newInstance(mProvider.getBackupNameFormat())
+                                           .show(getChildFragmentManager(), "backup_name_format_builder");
             return true;
         });
 
@@ -66,7 +68,8 @@ public class LocalBackupStorageSettingsFragment extends PreferenceFragmentCompat
     }
 
     private void updateBackupNameFormatSummary() {
-        mBackupNameFormatPref.setSummary(getString(R.string.settings_main_backup_file_name_format_summary, BackupNameFormat.format(mProvider.getBackupNameFormat(), mDemoMeta)));
+        mBackupNameFormatPref.setSummary(getString(R.string.settings_main_backup_file_name_format_summary,
+                                                   BackupNameFormat.format(mProvider.getBackupNameFormat(), mDemoMeta)));
     }
 
     private void updateBackupDirSummary() {
@@ -75,27 +78,25 @@ public class LocalBackupStorageSettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void onDirectoryPicked(@Nullable String tag, Uri dirUri) {
-        if (tag == null)
+        if (tag == null) {
             return;
+        }
 
-        switch (tag) {
-            case "backup_dir":
-                mProvider.setBackupDirUri(dirUri);
-                updateBackupDirSummary();
-                break;
+        if ("backup_dir".equals(tag)) {
+            mProvider.setBackupDirUri(dirUri);
+            updateBackupDirSummary();
         }
     }
 
     @Override
     public void onFormatBuilt(@Nullable String tag, @NonNull String format) {
-        if (tag == null)
+        if (tag == null) {
             return;
+        }
 
-        switch (tag) {
-            case "backup_name_format_builder":
-                mProvider.setBackupNameFormat(format);
-                updateBackupNameFormatSummary();
-                break;
+        if ("backup_name_format_builder".equals(tag)) {
+            mProvider.setBackupNameFormat(format);
+            updateBackupNameFormatSummary();
         }
     }
 }

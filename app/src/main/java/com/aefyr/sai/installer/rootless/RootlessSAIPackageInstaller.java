@@ -28,33 +28,40 @@ public class RootlessSAIPackageInstaller extends SAIPackageInstaller {
     @SuppressLint("StaticFieldLeak")//This is application context, lul
     private static RootlessSAIPackageInstaller sInstance;
 
-    private BroadcastReceiver mFurtherInstallationEventsReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mFurtherInstallationEventsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             long sessionId = mSessionsMap.get(intent.getIntExtra(RootlessSAIPIService.EXTRA_SESSION_ID, -1), -1);
-            if (sessionId == -1)
+            if (sessionId == -1) {
                 return;
+            }
             switch (intent.getIntExtra(RootlessSAIPIService.EXTRA_INSTALLATION_STATUS, -1)) {
                 case RootlessSAIPIService.STATUS_SUCCESS:
-                    dispatchSessionUpdate(sessionId, SAIPackageInstaller.InstallationStatus.INSTALLATION_SUCCEED, intent.getStringExtra(RootlessSAIPIService.EXTRA_PACKAGE_NAME));
-                    if (getOngoingInstallation() != null && sessionId == getOngoingInstallation().getId())
+                    dispatchSessionUpdate(sessionId,
+                                          SAIPackageInstaller.InstallationStatus.INSTALLATION_SUCCEED,
+                                          intent.getStringExtra(RootlessSAIPIService.EXTRA_PACKAGE_NAME));
+                    if (getOngoingInstallation() != null && sessionId == getOngoingInstallation().getId()) {
                         installationCompleted();
+                    }
                     break;
                 case RootlessSAIPIService.STATUS_FAILURE:
-                    dispatchSessionUpdate(sessionId, SAIPackageInstaller.InstallationStatus.INSTALLATION_FAILED, intent.getStringExtra(RootlessSAIPIService.EXTRA_ERROR_DESCRIPTION));
-                    if (getOngoingInstallation() != null && sessionId == getOngoingInstallation().getId())
+                    dispatchSessionUpdate(sessionId,
+                                          SAIPackageInstaller.InstallationStatus.INSTALLATION_FAILED,
+                                          intent.getStringExtra(RootlessSAIPIService.EXTRA_ERROR_DESCRIPTION));
+                    if (getOngoingInstallation() != null && sessionId == getOngoingInstallation().getId()) {
                         installationCompleted();
+                    }
                     break;
             }
         }
     };
 
-    private PackageInstaller mPackageInstaller;
+    private final PackageInstaller mPackageInstaller;
 
     /**
      * Maps Android PackageInstaller session id to SAIPackageInstaller QueuedInstallation id
      */
-    private SparseLongArray mSessionsMap = new SparseLongArray();
+    private final SparseLongArray mSessionsMap = new SparseLongArray();
 
 
     public static RootlessSAIPackageInstaller getInstance(Context c) {
@@ -64,7 +71,8 @@ public class RootlessSAIPackageInstaller extends SAIPackageInstaller {
     private RootlessSAIPackageInstaller(Context c) {
         super(c);
         mPackageInstaller = getContext().getPackageManager().getPackageInstaller();
-        getContext().registerReceiver(mFurtherInstallationEventsReceiver, new IntentFilter(RootlessSAIPIService.ACTION_INSTALLATION_STATUS_NOTIFICATION));
+        getContext().registerReceiver(mFurtherInstallationEventsReceiver,
+                                      new IntentFilter(RootlessSAIPIService.ACTION_INSTALLATION_STATUS_NOTIFICATION));
         sInstance = this;
     }
 
@@ -77,8 +85,9 @@ public class RootlessSAIPackageInstaller extends SAIPackageInstaller {
         try (ApkSource apkSource = aApkSource) {
             PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
             sessionParams.setInstallLocation(PreferencesHelper.getInstance(getContext()).getInstallLocation());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 sessionParams.setInstallReason(PackageManager.INSTALL_REASON_USER);
+            }
 
             int sessionID = mPackageInstaller.createSession(sessionParams);
             mSessionsMap.put(sessionID, getOngoingInstallation().getId());
@@ -86,7 +95,10 @@ public class RootlessSAIPackageInstaller extends SAIPackageInstaller {
             session = mPackageInstaller.openSession(sessionID);
             int currentApkFile = 0;
             while (apkSource.nextApk()) {
-                try (InputStream inputStream = apkSource.openApkInputStream(); OutputStream outputStream = session.openWrite(String.format("%d.apk", currentApkFile++), 0, apkSource.getApkLength())) {
+                try (InputStream inputStream = apkSource.openApkInputStream();
+                     OutputStream outputStream = session.openWrite(String.format("%d.apk", currentApkFile++),
+                                                                   0,
+                                                                   apkSource.getApkLength())) {
                     IOUtils.copyStream(inputStream, outputStream);
                     session.fsync(outputStream);
                 }
@@ -97,11 +109,13 @@ public class RootlessSAIPackageInstaller extends SAIPackageInstaller {
             session.commit(pendingIntent.getIntentSender());
         } catch (Exception e) {
             Log.w(TAG, e);
-            dispatchCurrentSessionUpdate(InstallationStatus.INSTALLATION_FAILED, getContext().getString(R.string.installer_error_rootless, Utils.throwableToString(e)));
+            dispatchCurrentSessionUpdate(InstallationStatus.INSTALLATION_FAILED,
+                                         getContext().getString(R.string.installer_error_rootless, Utils.throwableToString(e)));
             installationCompleted();
         } finally {
-            if (session != null)
+            if (session != null) {
                 session.close();
+            }
         }
     }
 

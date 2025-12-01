@@ -39,16 +39,16 @@ import java.util.Locale;
 
 public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPackagesAdapter.ViewHolder> {
 
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
     private List<BackupApp> mApps;
 
     private OnItemInteractionListener mListener;
 
     private BackupPackagesFilterConfig mFilterConfig;
 
-    private RecyclerView.RecycledViewPool mFeatureViewPool;
+    private final RecyclerView.RecycledViewPool mFeatureViewPool;
 
-    private SimpleDateFormat mInstallOrUpdateDateSdf = new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault());
+    private final SimpleDateFormat mInstallOrUpdateDateSdf = new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault());
 
 
     public BackupPackagesAdapter(Selection<String> selection, LifecycleOwner lifecycleOwner, Context c) {
@@ -69,8 +69,9 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
     public void setFilterConfig(@Nullable BackupPackagesFilterConfig config, boolean applyNow) {
         mFilterConfig = config;
 
-        if (applyNow)
+        if (applyNow) {
             notifyDataSetChanged();
+        }
     }
 
     public void setInteractionListener(OnItemInteractionListener listener) {
@@ -112,16 +113,16 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
         return mApps.get(position).packageMeta().packageName.hashCode();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mAppName;
-        private TextView mAppVersion;
-        private TextView mAppPackage;
-        private AppCompatImageView mAppIcon;
-        private View mSelectionOverlay;
-        private ImageView mBackupStatus;
+        private final TextView mAppName;
+        private final TextView mAppVersion;
+        private final TextView mAppPackage;
+        private final AppCompatImageView mAppIcon;
+        private final View mSelectionOverlay;
+        private final ImageView mBackupStatus;
 
-        private BackupAppFeatureAdapter mFeatureAdapter;
+        private final BackupAppFeatureAdapter mFeatureAdapter;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -134,18 +135,21 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
             mBackupStatus = itemView.findViewById(R.id.iv_backup_status);
 
             itemView.findViewById(R.id.container_backup_package).setOnFocusChangeListener((v, hasFocus) -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
-                if (mListener != null)
+                if (mListener != null) {
                     mListener.onItemFocusChanged(hasFocus, adapterPosition, mApps.get(adapterPosition));
+                }
             });
 
             itemView.findViewById(R.id.container_backup_package).setOnLongClickListener(v -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return false;
+                }
 
                 BackupApp item = mApps.get(adapterPosition);
                 boolean selected = switchSelection(item.packageMeta().packageName);
@@ -155,13 +159,15 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
             });
 
             itemView.findViewById(R.id.container_backup_package).setOnClickListener(v -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
                 if (!getSelection().hasSelection()) {
-                    if (mListener != null)
+                    if (mListener != null) {
                         mListener.onBackupButtonClicked(mApps.get(adapterPosition));
+                    }
                 } else {
                     BackupApp item = mApps.get(adapterPosition);
                     boolean selected = switchSelection(item.packageMeta().packageName);
@@ -170,7 +176,9 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
             });
 
             RecyclerView featureRecycler = itemView.findViewById(R.id.rv_backup_app_features);
-            FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(itemView.getContext(), FlexDirection.ROW, FlexWrap.WRAP);
+            FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(itemView.getContext(),
+                                                                          FlexDirection.ROW,
+                                                                          FlexWrap.WRAP);
             layoutManager.setJustifyContent(JustifyContent.FLEX_START);
             featureRecycler.setLayoutManager(layoutManager);
 
@@ -203,9 +211,9 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
             mAppPackage.setText(packageMeta.packageName);
 
             Glide.with(mAppIcon)
-                    .load(packageMeta.iconUri != null ? packageMeta.iconUri : R.drawable.placeholder_app_icon)
-                    .placeholder(R.drawable.placeholder_app_icon)
-                    .into(mAppIcon);
+                 .load(packageMeta.iconUri != null ? packageMeta.iconUri : R.drawable.placeholder_app_icon)
+                 .placeholder(R.drawable.placeholder_app_icon)
+                 .into(mAppIcon);
 
             mFeatureAdapter.setFeatures(createContextualFeatures(packageMeta));
 
@@ -213,8 +221,9 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
         }
 
         private List<AppFeature> createContextualFeatures(PackageMeta packageMeta) {
-            if (mFilterConfig == null)
+            if (mFilterConfig == null) {
                 return Collections.emptyList();
+            }
 
             ArrayList<AppFeature> features = new ArrayList<>();
 
@@ -224,25 +233,28 @@ public class BackupPackagesAdapter extends SelectableAdapter<String, BackupPacka
                 case NAME:
                     break;
                 case INSTALL_TIME:
-                    features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_install_date, mInstallOrUpdateDateSdf.format(packageMeta.installTime))));
+                    features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_install_date,
+                                                                    mInstallOrUpdateDateSdf.format(packageMeta.installTime))));
                     break;
                 case UPDATE_TIME:
-                    features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_update_date, mInstallOrUpdateDateSdf.format(packageMeta.updateTime))));
+                    features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_update_date,
+                                                                    mInstallOrUpdateDateSdf.format(packageMeta.updateTime))));
                     break;
             }
 
-            if (mFilterConfig.getSplitApkFilter() == BackupPackagesFilterConfig.SimpleFilterMode.WHATEVER && packageMeta.hasSplits)
+            if (mFilterConfig.getSplitApkFilter() == BackupPackagesFilterConfig.SimpleFilterMode.WHATEVER && packageMeta.hasSplits) {
                 features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_split)));
+            }
 
-            if (mFilterConfig.getSystemAppFilter() == BackupPackagesFilterConfig.SimpleFilterMode.WHATEVER && packageMeta.isSystemApp)
+            if (mFilterConfig.getSystemAppFilter() == BackupPackagesFilterConfig.SimpleFilterMode.WHATEVER && packageMeta.isSystemApp) {
                 features.add(new SimpleAppFeature(res.getString(R.string.backup_app_feature_system_app)));
+            }
 
             return features;
         }
 
         void recycle() {
-            Glide.with(mAppIcon)
-                    .clear(mAppIcon);
+            Glide.with(mAppIcon).clear(mAppIcon);
 
             mFeatureAdapter.setFeatures(null);
         }

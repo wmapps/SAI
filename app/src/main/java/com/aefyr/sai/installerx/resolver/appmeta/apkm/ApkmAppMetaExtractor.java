@@ -27,7 +27,7 @@ public class ApkmAppMetaExtractor implements AppMetaExtractor {
     private static final String META_FILE = "info.json";
     private static final String ICON_FILE = "icon.png";
 
-    private Context mContext;
+    private final Context mContext;
 
     public ApkmAppMetaExtractor(Context context) {
         mContext = context.getApplicationContext();
@@ -42,17 +42,15 @@ public class ApkmAppMetaExtractor implements AppMetaExtractor {
 
             for (ApkSourceFile.Entry entry : apkSourceFile.listEntries()) {
 
-                if (entry.getLocalPath().equals(META_FILE)) {
+                if (META_FILE.equals(entry.getLocalPath())) {
                     JSONObject metaJson = new JSONObject(IOUtils.readStream(apkSourceFile.openEntryInputStream(entry), StandardCharsets.UTF_8));
 
-                    switch (metaJson.getInt("apkm_version")) {
-                        case 5:
-                            extractMetaV5(metaJson, appMeta);
-                            seenMetaFile = true;
-                            break;
+                    if (metaJson.getInt("apkm_version") == 5) {
+                        extractMetaV5(metaJson, appMeta);
+                        seenMetaFile = true;
                     }
 
-                } else if (entry.getLocalPath().equals(ICON_FILE)) {
+                } else if (ICON_FILE.equals(entry.getLocalPath())) {
                     File iconFile = Utils.createTempFileInCache(mContext, "ApkmAppMetaExtractor", "png");
                     if (iconFile == null)
                         continue;

@@ -27,8 +27,9 @@ public abstract class SelectableAdapter<Key, ViewHolder extends RecyclerView.Vie
         @Override
         public void onKeySelectionChanged(Selection<Key> selection, Key key, boolean selected) {
             Integer position = mKeyToPosition.get(key);
-            if (position != null)
+            if (position != null) {
                 notifyItemChanged(position);
+            }
         }
 
         @Override
@@ -42,17 +43,20 @@ public abstract class SelectableAdapter<Key, ViewHolder extends RecyclerView.Vie
             Set<Integer> positionsToUpdate = new HashSet<>();
             for (Key key : keys) {
                 Integer position = mKeyToPosition.get(key);
-                if (position != null)
+                if (position != null) {
                     positionsToUpdate.add(position);
+                }
             }
 
             //Apparently calling notifyItemChanged for every item is a bit laggy when a lot of bound positions require updating, notifyDataSetChanged works better in that case
             if (positionsToUpdate.size() > mKeyToPosition.size() / 2) {
-                Log.d(TAG, "onMultipleKeysSelectionChanged: Update of more than a half of bound positions required, using notifyDataSetChanged");
+                Log.d(TAG,
+                      "onMultipleKeysSelectionChanged: Update of more than a half of bound positions required, using notifyDataSetChanged");
                 notifyDataSetChanged();
             } else {
-                for (Integer position : positionsToUpdate)
+                for (Integer position : positionsToUpdate) {
                     notifyItemChanged(position);
+                }
             }
         }
     };
@@ -65,8 +69,9 @@ public abstract class SelectableAdapter<Key, ViewHolder extends RecyclerView.Vie
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            for (int i = positionStart; i < positionStart + itemCount; i++)
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
                 mKeyToPosition.remove(mPositionToKey.remove(i));
+            }
         }
 
         @Override
@@ -93,8 +98,9 @@ public abstract class SelectableAdapter<Key, ViewHolder extends RecyclerView.Vie
     public SelectableAdapter(Selection<Key> selection, LifecycleOwner lifecycleOwner) {
         mSelection = selection;
 
-        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED)
+        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             return;
+        }
 
         lifecycleOwner.getLifecycle().addObserver(new DefaultLifecycleObserver() {
             @Override
@@ -134,14 +140,16 @@ public abstract class SelectableAdapter<Key, ViewHolder extends RecyclerView.Vie
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         int adapterPosition = holder.getAdapterPosition();
-        if (adapterPosition == RecyclerView.NO_POSITION)
+        if (adapterPosition == RecyclerView.NO_POSITION) {
             return;
+        }
 
         //onViewRecycled calls seem to be batched after onBindViewHolder calls, that will lead to clearing an actually required key without this check
         if (mRecycler.findViewHolderForAdapterPosition(adapterPosition) == null) {
             Key key = mPositionToKey.remove(adapterPosition);
-            if (key != null)
+            if (key != null) {
                 mKeyToPosition.remove(key);
+            }
         }
     }
 

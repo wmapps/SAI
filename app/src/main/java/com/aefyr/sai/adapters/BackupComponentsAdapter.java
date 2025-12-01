@@ -21,7 +21,7 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
 
     private List<BackupComponent> mComponents;
 
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
     private ComponentRenderer mComponentRenderer;
 
     public BackupComponentsAdapter(Context context) {
@@ -35,6 +35,7 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
         notifyDataSetChanged();
     }
 
+    @SuppressWarnings("unused")
     public void setComponentRenderer(ComponentRenderer renderer) {
         mComponentRenderer = renderer;
         notifyDataSetChanged();
@@ -56,9 +57,9 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
         return mComponents == null ? 0 : mComponents.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private Chip mChip;
+        private final Chip mChip;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -72,7 +73,7 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
         }
     }
 
-    interface ComponentRenderer {
+    public interface ComponentRenderer {
 
         String render(BackupComponent component);
 
@@ -80,7 +81,7 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
 
     public static class DefaultComponentRenderer implements ComponentRenderer {
 
-        private Context mContext;
+        private final Context mContext;
 
         public DefaultComponentRenderer(Context context) {
             mContext = context;
@@ -89,9 +90,8 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
 
         @Override
         public String render(BackupComponent component) {
-            switch (component.type()) {
-                case StandardComponentTypes.TYPE_APK_FILES:
-                    return formatWithSize(R.string.backup_component_apk_files, component.size());
+            if (StandardComponentTypes.TYPE_APK_FILES.equals(component.type())) {
+                return formatWithSize(R.string.backup_component_apk_files, component.size());
             }
 
             return formatWithSize(mContext.getString(R.string.backup_component_unknown, component.type()), component.size());
@@ -104,7 +104,5 @@ public class BackupComponentsAdapter extends RecyclerView.Adapter<BackupComponen
         private String formatWithSize(String s, long size) {
             return s + " (" + Utils.formatSize(mContext, size) + ")";
         }
-
-
     }
 }

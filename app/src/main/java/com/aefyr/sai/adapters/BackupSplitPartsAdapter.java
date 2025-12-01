@@ -21,8 +21,8 @@ import java.util.List;
 
 public class BackupSplitPartsAdapter extends SelectableAdapter<String, BackupSplitPartsAdapter.ViewHolder> {
 
-    private Context mContext;
-    private LayoutInflater mInflater;
+    private final Context mContext;
+    private final LayoutInflater mInflater;
     private List<SplitApkPart> mParts;
 
     public BackupSplitPartsAdapter(Selection<String> selection, LifecycleOwner lifecycleOwner, Context c) {
@@ -64,13 +64,13 @@ public class BackupSplitPartsAdapter extends SelectableAdapter<String, BackupSpl
         return mParts.get(position).getPath().hashCode();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mName;
-        private TextView mSize;
-        private TextView mPath;
+        private final TextView mName;
+        private final TextView mSize;
+        private final TextView mPath;
 
-        private CheckBox mCheck;
+        private final CheckBox mCheck;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -82,9 +82,10 @@ public class BackupSplitPartsAdapter extends SelectableAdapter<String, BackupSpl
             mCheck = itemView.findViewById(R.id.check_split_apk_part);
 
             itemView.setOnClickListener((v) -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
                 SplitApkPart item = mParts.get(adapterPosition);
                 boolean selected = switchSelection(item.toKey());

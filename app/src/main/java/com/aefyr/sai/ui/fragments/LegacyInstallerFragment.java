@@ -35,7 +35,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LegacyInstallerFragment extends InstallerFragment implements FilePickerDialogFragment.OnFilesSelectedListener, InstallationConfirmationDialogFragment.ConfirmationListener {
+public class LegacyInstallerFragment extends InstallerFragment implements FilePickerDialogFragment.OnFilesSelectedListener,
+                                                                          InstallationConfirmationDialogFragment.ConfirmationListener {
 
     private static final int REQUEST_CODE_GET_FILES = 337;
 
@@ -72,8 +73,9 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
             }
         });
         mViewModel.getEvents().observe(getViewLifecycleOwner(), (event) -> {
-            if (event.isConsumed())
+            if (event.isConsumed()) {
                 return;
+            }
 
             String[] eventData = event.consume();
             switch (eventData[0]) {
@@ -81,17 +83,24 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
                     showPackageInstalledAlert(eventData[1]);
                     break;
                 case LegacyInstallerViewModel.EVENT_INSTALLATION_FAILED:
-                    ErrorLogDialogFragment.newInstance(getString(R.string.installer_installation_failed), eventData[1]).show(getChildFragmentManager(), "installation_error_dialog");
+                    ErrorLogDialogFragment.newInstance(getString(R.string.installer_installation_failed), eventData[1])
+                                          .show(getChildFragmentManager(), "installation_error_dialog");
                     break;
             }
         });
 
-        findViewById(R.id.ib_toggle_theme).setOnClickListener((v -> ThemeSelectionDialogFragment.newInstance(requireContext()).show(getChildFragmentManager(), "theme_selection_dialog")));
-        mButtonSettings.setOnClickListener((v) -> PreferencesActivity.open(requireContext(), PreferencesFragment.class, getString(R.string.settings_title)));
+        findViewById(R.id.ib_toggle_theme).setOnClickListener((v -> ThemeSelectionDialogFragment.newInstance(requireContext())
+                                                                                                .show(getChildFragmentManager(),
+                                                                                                      "theme_selection_dialog")));
+        mButtonSettings.setOnClickListener((v) -> PreferencesActivity.open(requireContext(),
+                                                                           PreferencesFragment.class,
+                                                                           getString(R.string.settings_title)));
 
         mButton.setOnClickListener((v) -> checkPermissionsAndPickFiles());
         mButton.setOnLongClickListener((v) -> pickFilesWithSaf());
-        findViewById(R.id.button_help).setOnClickListener((v) -> AlertsUtils.showAlert(this, R.string.help, R.string.installer_help));
+        findViewById(R.id.button_help).setOnClickListener((v) -> AlertsUtils.showAlert(this,
+                                                                                       R.string.help,
+                                                                                       R.string.installer_help));
 
         if (mPendingActionViewUri != null) {
             handleActionView(mPendingActionViewUri);
@@ -106,15 +115,19 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
             return;
         }
 
-        DialogFragment existingDialog = (DialogFragment) getChildFragmentManager().findFragmentByTag("installation_confirmation_dialog");
-        if (existingDialog != null)
+        DialogFragment existingDialog = (DialogFragment) getChildFragmentManager().findFragmentByTag(
+                "installation_confirmation_dialog");
+        if (existingDialog != null) {
             existingDialog.dismiss();
-        InstallationConfirmationDialogFragment.newInstance(uri).show(getChildFragmentManager(), "installation_confirmation_dialog");
+        }
+        InstallationConfirmationDialogFragment.newInstance(uri)
+                                              .show(getChildFragmentManager(), "installation_confirmation_dialog");
     }
 
     private void checkPermissionsAndPickFiles() {
-        if (!PermissionsUtils.checkAndRequestStoragePermissions(this))
+        if (!PermissionsUtils.checkAndRequestStoragePermissions(this)) {
             return;
+        }
 
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.MULTI_MODE;
@@ -125,14 +138,16 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
         properties.sortBy = mHelper.getFilePickerSortBy();
         properties.sortOrder = mHelper.getFilePickerSortOrder();
 
-        FilePickerDialogFragment.newInstance(null, getString(R.string.installer_pick_apks), properties).show(getChildFragmentManager(), "dialog_files_picker");
+        FilePickerDialogFragment.newInstance(null, getString(R.string.installer_pick_apks), properties)
+                                .show(getChildFragmentManager(), "dialog_files_picker");
     }
 
     private boolean pickFilesWithSaf() {
         Intent getContentIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getContentIntent.setType("*/*");
         getContentIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        startActivityForResult(Intent.createChooser(getContentIntent, getString(R.string.installer_pick_apks)), REQUEST_CODE_GET_FILES);
+        startActivityForResult(Intent.createChooser(getContentIntent, getString(R.string.installer_pick_apks)),
+                               REQUEST_CODE_GET_FILES);
 
         return true;
     }
@@ -142,10 +157,11 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PermissionsUtils.REQUEST_CODE_STORAGE_PERMISSIONS) {
-            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
+            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_storage);
-            else
+            } else {
                 checkPermissionsAndPickFiles();
+            }
         }
 
     }
@@ -155,8 +171,9 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_GET_FILES) {
-            if (resultCode != Activity.RESULT_OK || data == null)
+            if (resultCode != Activity.RESULT_OK || data == null) {
                 return;
+            }
 
             if (data.getData() != null) {
                 mViewModel.installPackagesFromContentProviderZip(data.getData());
@@ -167,8 +184,9 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
                 ClipData clipData = data.getClipData();
                 List<Uri> apkUris = new ArrayList<>(clipData.getItemCount());
 
-                for (int i = 0; i < clipData.getItemCount(); i++)
+                for (int i = 0; i < clipData.getItemCount(); i++) {
                     apkUris.add(clipData.getItemAt(i).getUri());
+                }
 
                 mViewModel.installPackagesFromContentProviderUris(apkUris);
             }
@@ -184,9 +202,9 @@ public class LegacyInstallerFragment extends InstallerFragment implements FilePi
 
         mButtonSettings.setEnabled(enabled);
         mButtonSettings.animate()
-                .alpha(enabled ? 1f : 0.4f)
-                .setDuration(300)
-                .start();
+                       .alpha(enabled ? 1f : 0.4f)
+                       .setDuration(300)
+                       .start();
     }
 
     @Override

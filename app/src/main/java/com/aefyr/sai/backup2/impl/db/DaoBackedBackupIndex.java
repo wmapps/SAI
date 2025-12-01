@@ -32,12 +32,12 @@ public class DaoBackedBackupIndex implements BackupIndex {
 
     private static DaoBackedBackupIndex sInstance;
 
-    private Context mContext;
-    private AppDatabase mAppDb;
+    private final Context mContext;
+    private final AppDatabase mAppDb;
 
-    private BackupDao mDao;
+    private final BackupDao mDao;
 
-    private Set<File> mVacuumImmuneFiles = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<File> mVacuumImmuneFiles = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public static synchronized DaoBackedBackupIndex getInstance(Context context) {
         return sInstance != null ? sInstance : new DaoBackedBackupIndex(context);
@@ -78,8 +78,9 @@ public class DaoBackedBackupIndex implements BackupIndex {
         }
 
         mAppDb.runInTransaction(() -> {
-            if (mDao.getBackupMetaForUri(backup.uri().toString()) != null)
+            if (mDao.getBackupMetaForUri(backup.uri().toString()) != null) {
                 mDao.removeByUri(backup.uri().toString());
+            }
 
             BackupEntity backupEntity = BackupEntity.fromBackup(backup, iconFile);
 
@@ -96,8 +97,9 @@ public class DaoBackedBackupIndex implements BackupIndex {
     @Override
     public Backup deleteEntryByUri(Uri uri) {
         BackupWithComponents backupWithComponents = mDao.getBackupMetaForUri(uri.toString());
-        if (backupWithComponents == null)
+        if (backupWithComponents == null) {
             return null;
+        }
 
         mDao.removeByUri(uri.toString());
         return backupWithComponents;
@@ -214,9 +216,20 @@ public class DaoBackedBackupIndex implements BackupIndex {
                 }
             }
 
-            Log.i(TAG, String.format("Icons vacuum finished in %d ms.\nValid files: %d\nSkipped files: %d\nDeleted files: %d", sw.millisSinceStart(), validFiles, filesSkipped, filesDeleted));
+            Log.i(TAG,
+                  String.format("Icons vacuum finished in %d ms.\nValid files: %d\nSkipped files: %d\nDeleted files: %d",
+                                sw.millisSinceStart(),
+                                validFiles,
+                                filesSkipped,
+                                filesDeleted));
         } catch (Exception e) {
-            Log.w(TAG, String.format("Icons vacuum failed, time spent - %d ms.\nValid files: %d\nSkipped files: %d\nDeleted files: %d", sw.millisSinceStart(), validFiles, filesSkipped, filesDeleted), e);
+            Log.w(TAG,
+                  String.format("Icons vacuum failed, time spent - %d ms.\nValid files: %d\nSkipped files: %d\nDeleted files: %d",
+                                sw.millisSinceStart(),
+                                validFiles,
+                                filesSkipped,
+                                filesDeleted),
+                  e);
         }
     }
 }

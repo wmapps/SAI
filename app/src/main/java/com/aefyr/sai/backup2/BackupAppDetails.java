@@ -11,7 +11,9 @@ public interface BackupAppDetails {
     List<Backup> backups();
 
     enum State {
-        LOADING, READY, ERROR
+        LOADING,
+        READY,
+        ERROR
     }
 
 }

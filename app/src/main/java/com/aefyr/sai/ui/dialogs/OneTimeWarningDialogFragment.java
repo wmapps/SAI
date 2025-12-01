@@ -27,17 +27,20 @@ public class OneTimeWarningDialogFragment extends DialogFragment {
     /**
      * @param tag unique tag for this warning
      */
-    public static void showIfNeeded(Context context, FragmentManager fragmentManager, @StringRes int title, @StringRes int message, String tag) {
+    public static void showIfNeeded(Context context, FragmentManager fragmentManager, @StringRes int title,
+                                    @StringRes int message, String tag) {
         showIfNeeded(context, fragmentManager, context.getText(title), context.getText(message), tag);
     }
 
     /**
      * @param tag unique tag for this warning
      */
-    public static void showIfNeeded(Context context, FragmentManager fragmentManager, CharSequence title, CharSequence message, String tag) {
+    public static void showIfNeeded(Context context, FragmentManager fragmentManager, CharSequence title, CharSequence message,
+                                    String tag) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        if (prefs.getBoolean(tag, false))
+        if (prefs.getBoolean(tag, false)) {
             return;
+        }
 
         newInstance(title, message, tag).show(fragmentManager, null);
     }
@@ -61,8 +64,9 @@ public class OneTimeWarningDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             throw new IllegalStateException("Arguments mustn't be null");
+        }
 
         mTitle = args.getCharSequence(ARG_TITLE, "title");
         mMessage = args.getCharSequence(ARG_MESSAGE, "message");
@@ -77,7 +81,11 @@ public class OneTimeWarningDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(requireContext())
                 .setTitle(mTitle)
                 .setMessage(mMessage)
-                .setPositiveButton(R.string.dont_show_again, (d, w) -> requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(mTag, true).apply())
+                .setPositiveButton(R.string.dont_show_again,
+                                   (d, w) -> requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                                                             .edit()
+                                                             .putBoolean(mTag, true)
+                                                             .apply())
                 .create();
     }
 

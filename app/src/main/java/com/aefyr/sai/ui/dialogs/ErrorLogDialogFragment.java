@@ -12,8 +12,6 @@ import androidx.fragment.app.DialogFragment;
 import com.aefyr.sai.R;
 import com.aefyr.sai.utils.Utils;
 
-import java.util.Objects;
-
 public class ErrorLogDialogFragment extends DialogFragment {
     private static final String ARG_TITLE = "title";
     private static final String ARG_LOG = "log";
@@ -35,8 +33,9 @@ public class ErrorLogDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
+        }
 
         mTitle = args.getCharSequence(ARG_TITLE, "title");
         mLog = args.getCharSequence(ARG_LOG, "log");
@@ -45,12 +44,12 @@ public class ErrorLogDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new AlertDialog.Builder(Objects.requireNonNull(getContext()))
+        return new AlertDialog.Builder(requireContext())
                 .setTitle(mTitle)
                 .setMessage(mLog)
                 .setPositiveButton(R.string.ok, null)
                 .setNeutralButton(R.string.copy2, (d, w) -> {
-                    Utils.copyTextToClipboard(getContext(), mLog);
+                    Utils.copyTextToClipboard(requireContext(), mLog);
                     Toast.makeText(getContext(), R.string.copied, Toast.LENGTH_SHORT).show();
                     dismiss();
                 })

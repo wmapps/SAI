@@ -21,8 +21,8 @@ import java.util.List;
 
 public class LicensesViewModel extends AndroidViewModel {
 
-    private MutableLiveData<List<License>> mLicenses = new MutableLiveData<>();
-    private MutableLiveData<Boolean> mAreLicensesLoading = new MutableLiveData<>();
+    private final MutableLiveData<List<License>> mLicenses = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> mAreLicensesLoading = new MutableLiveData<>();
 
     public LicensesViewModel(@NonNull Application application) {
         super(application);
@@ -42,8 +42,9 @@ public class LicensesViewModel extends AndroidViewModel {
     }
 
     private void loadLicences() {
-        if (mAreLicensesLoading.getValue())
+        if (Boolean.TRUE.equals(mAreLicensesLoading.getValue())) {
             return;
+        }
 
         mAreLicensesLoading.setValue(true);
 
@@ -70,11 +71,15 @@ public class LicensesViewModel extends AndroidViewModel {
         String licensesDir = "licenses/" + flavor;
 
         String[] rawLicenses = assetManager.list(licensesDir);
-        if (rawLicenses == null || rawLicenses.length == 0)
+        if (rawLicenses == null) {
             return;
+        }
 
-        for (String rawLicense : rawLicenses)
-            licenses.add(new License(rawLicense, IOUtils.readStream(assetManager.open(licensesDir + "/" + rawLicense), StandardCharsets.UTF_8)));
+        for (String rawLicense : rawLicenses) {
+            licenses.add(new License(rawLicense,
+                                     IOUtils.readStream(assetManager.open(licensesDir + "/" + rawLicense),
+                                                        StandardCharsets.UTF_8)));
+        }
     }
 
 }

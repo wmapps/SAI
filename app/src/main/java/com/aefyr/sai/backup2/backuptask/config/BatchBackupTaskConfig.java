@@ -4,12 +4,12 @@ import java.util.List;
 
 public class BatchBackupTaskConfig implements BackupTaskConfig {
 
-    private String mBackupStorageId;
-    private List<SingleBackupTaskConfig> mConfigs;
+    private final String mBackupStorageId;
+    private final List<SingleBackupTaskConfig> mConfigs;
 
     /**
      * @param backupStorageId   backup storage id for this backup task. Please note that backup storage ids in {@code singleTaskConfigs} will be ignored for batch tasks
-     * @param singleTaskConfigs
+     * @param singleTaskConfigs list of single backup task configs
      */
     public BatchBackupTaskConfig(String backupStorageId, List<SingleBackupTaskConfig> singleTaskConfigs) {
         mBackupStorageId = backupStorageId;

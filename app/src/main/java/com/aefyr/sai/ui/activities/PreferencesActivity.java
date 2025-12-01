@@ -9,7 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.aefyr.sai.BuildConfig;
 import com.aefyr.sai.R;
-import com.aefyr.sai.view.coolbar.Coolbar;
+import com.aefyr.sai.view.coolbar.CoolBar;
 
 import java.lang.reflect.Constructor;
 import java.util.Objects;
@@ -19,15 +19,13 @@ public class PreferencesActivity extends ThemedActivity {
     private static final String EXTRA_PREF_FRAGMENT_CLASS = BuildConfig.APPLICATION_ID + ".extra.PreferencesActivity.PREF_FRAGMENT_CLASS";
     private static final String EXTRA_TITLE = BuildConfig.APPLICATION_ID + ".extra.PreferencesActivity.TITLE";
 
-    private Coolbar mCoolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        mCoolbar = findViewById(R.id.coolbar);
-        mCoolbar.setTitle(getIntent().getStringExtra(Intent.EXTRA_TITLE));
+        final CoolBar coolbar = findViewById(R.id.coolbar);
+        coolbar.setTitle(getIntent().getStringExtra(Intent.EXTRA_TITLE));
 
         FragmentManager fm = getSupportFragmentManager();
         PreferenceFragmentCompat mPreferencesFragment = (PreferenceFragmentCompat) fm.findFragmentByTag(TAG_PREFERENCES_FRAGMENT);

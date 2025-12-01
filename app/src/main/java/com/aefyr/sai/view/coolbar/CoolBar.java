@@ -18,7 +18,7 @@ import androidx.annotation.AttrRes;
 
 import com.aefyr.sai.R;
 
-public class Coolbar extends ViewGroup {
+public class CoolBar extends ViewGroup {
     private static final int DEFAULT_TITLE_TEXT_SIZE_SP = 24;
     private static final int DEFAULT_TITLE_COLOR = 0xff212121;
 
@@ -28,24 +28,24 @@ public class Coolbar extends ViewGroup {
     private int mWidth;
     private int mTitleColor = 0xff212121;
 
-    public Coolbar(Context context) {
+    public CoolBar(Context context) {
         super(context);
         init();
     }
 
-    public Coolbar(Context context, AttributeSet attrs) {
+    public CoolBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         parseAttrs(attrs);
         init();
     }
 
-    public Coolbar(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CoolBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         parseAttrs(attrs);
         init();
     }
 
-    public Coolbar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CoolBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         parseAttrs(attrs);
         init();
@@ -54,7 +54,8 @@ public class Coolbar extends ViewGroup {
     private void parseAttrs(AttributeSet attrs) {
         TypedArray a = getResources().obtainAttributes(attrs, R.styleable.Coolbar);
         mTitleText = a.getString(R.styleable.Coolbar_title);
-        mTitleColor = a.getColor(R.styleable.Coolbar_titleColor, getThemeColor(androidx.appcompat.R.attr.titleTextColor, DEFAULT_TITLE_COLOR));
+        mTitleColor = a.getColor(R.styleable.Coolbar_titleColor,
+                                 getThemeColor(androidx.appcompat.R.attr.titleTextColor, DEFAULT_TITLE_COLOR));
         a.recycle();
     }
 
@@ -71,14 +72,15 @@ public class Coolbar extends ViewGroup {
         mTitle.setSelected(true);
         addView(mTitle);
 
-        if (getBackground() == null)
+        if (getBackground() == null) {
             setBackgroundColor(getThemeColor(androidx.appcompat.R.attr.colorPrimary, Color.WHITE));
+        }
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        setOutlineProvider(new CoolbarOutlineProvider(w, h));
+        setOutlineProvider(new CoolBarOutlineProvider(w, h));
     }
 
     @Override
@@ -89,10 +91,11 @@ public class Coolbar extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int desiredWidth;
-        if (getParent() instanceof ViewGroup)
+        if (getParent() instanceof ViewGroup) {
             desiredWidth = ((ViewGroup) getParent()).getWidth();
-        else
+        } else {
             desiredWidth = getResources().getDisplayMetrics().widthPixels;
+        }
 
         int desiredHeight = dpToPx(56);
 
@@ -123,25 +126,26 @@ public class Coolbar extends ViewGroup {
         //Children
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || child == mTitle)
+            if (child.getVisibility() == GONE || child == mTitle) {
                 continue;
+            }
 
             LayoutParams params = (LayoutParams) child.getLayoutParams();
 
             int heightMS;
             int widthMS;
 
-            if (params.height == ViewGroup.LayoutParams.MATCH_PARENT)
+            if (params.height == ViewGroup.LayoutParams.MATCH_PARENT) {
                 heightMS = MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY);
-            else if (params.height == LayoutParams.WRAP_CONTENT) {
+            } else if (params.height == LayoutParams.WRAP_CONTENT) {
                 heightMS = MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.AT_MOST);
             } else {
                 heightMS = MeasureSpec.makeMeasureSpec(clamp(params.height, 0, mHeight), MeasureSpec.EXACTLY);
             }
 
-            if (params.width == ViewGroup.LayoutParams.MATCH_PARENT)
+            if (params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
                 widthMS = MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY);
-            else if (params.width == LayoutParams.WRAP_CONTENT) {
+            } else if (params.width == LayoutParams.WRAP_CONTENT) {
                 widthMS = MeasureSpec.makeMeasureSpec(mHeight * 2, MeasureSpec.AT_MOST);
             } else {
                 widthMS = MeasureSpec.makeMeasureSpec(clamp(params.width, 0, mHeight * 2), MeasureSpec.EXACTLY);
@@ -171,8 +175,9 @@ public class Coolbar extends ViewGroup {
         int endOffset = 0;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || child == mTitle)
+            if (child.getVisibility() == GONE || child == mTitle) {
                 continue;
+            }
 
             LayoutParams params = (LayoutParams) child.getLayoutParams();
 
@@ -199,10 +204,12 @@ public class Coolbar extends ViewGroup {
 
 
         if (startOffset > endOffset) {
-            mTitle.measure(MeasureSpec.makeMeasureSpec((getMeasuredWidth() - startOffset * 2), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
+            mTitle.measure(MeasureSpec.makeMeasureSpec((getMeasuredWidth() - startOffset * 2), MeasureSpec.EXACTLY),
+                           MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
             mTitle.layout(startOffset, 0, getMeasuredWidth() - endOffset - (startOffset - endOffset), getMeasuredHeight());
         } else {
-            mTitle.measure(MeasureSpec.makeMeasureSpec((getMeasuredWidth() - endOffset * 2), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
+            mTitle.measure(MeasureSpec.makeMeasureSpec((getMeasuredWidth() - endOffset * 2), MeasureSpec.EXACTLY),
+                           MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
             mTitle.layout(startOffset + (endOffset - startOffset), 0, getMeasuredWidth() - endOffset, getMeasuredHeight());
         }
 
@@ -233,20 +240,23 @@ public class Coolbar extends ViewGroup {
     }
 
     private int clamp(int a, int min, int max) {
-        if (a < min)
+        if (a < min) {
             return min;
-        if (a > max)
+        }
+        if (a > max) {
             return max;
+        }
         return a;
     }
 
     private int getThemeColor(@AttrRes int attr, int defaultColor) {
         Resources.Theme theme = getContext().getTheme();
         TypedValue color = new TypedValue();
-        if (theme.resolveAttribute(attr, color, true))
+        if (theme.resolveAttribute(attr, color, true)) {
             return color.data;
-        else
+        } else {
             return defaultColor;
+        }
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams {
@@ -277,11 +287,11 @@ public class Coolbar extends ViewGroup {
         }
     }
 
-    private class CoolbarOutlineProvider extends ViewOutlineProvider {
+    private static class CoolBarOutlineProvider extends ViewOutlineProvider {
         int mWidth;
         int mHeight;
 
-        CoolbarOutlineProvider(int width, int height) {
+        CoolBarOutlineProvider(int width, int height) {
             mWidth = width;
             mHeight = height;
         }

@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
@@ -69,7 +70,7 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
         mDivider = a.getDrawable(0);
         if (mDivider == null) {
             Log.w(TAG, "@android:attr/listDivider was not set in the theme used for this "
-                    + "DividerItemDecoration. Please set that attribute all call setDrawable()");
+                       + "DividerItemDecoration. Please set that attribute all call setDrawable()");
         }
         a.recycle();
         setOrientation(orientation);
@@ -94,7 +95,7 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
      *
      * @param drawable Drawable that should be used as a divider.
      */
-    public void setDrawable(@NonNull Drawable drawable) {
+    public void setDrawable(@Nullable Drawable drawable) {
         if (drawable == null) {
             throw new IllegalArgumentException("Drawable cannot be null.");
         }
@@ -110,7 +111,7 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
     }
 
     @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(@NonNull Canvas c, RecyclerView parent, @NonNull RecyclerView.State state) {
         if (parent.getLayoutManager() == null || mDivider == null) {
             return;
         }
@@ -130,7 +131,7 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
             left = parent.getPaddingLeft();
             right = parent.getWidth() - parent.getPaddingRight();
             canvas.clipRect(left, parent.getPaddingTop(), right,
-                    parent.getHeight() - parent.getPaddingBottom());
+                            parent.getHeight() - parent.getPaddingBottom());
         } else {
             left = 0;
             right = parent.getWidth();
@@ -142,8 +143,9 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
         for (int i = 0; i < childCount; i++) {
             final View child = parent.getChildAt(i);
             int adapterPosition = parent.getChildAdapterPosition(child);
-            if (adapterPosition == 0 || adapterPosition == itemCount - 1)
+            if (adapterPosition == 0 || adapterPosition == itemCount - 1) {
                 continue;
+            }
 
             parent.getDecoratedBoundsWithMargins(child, mBounds);
             final int bottom = mBounds.bottom + Math.round(child.getTranslationY());
@@ -163,7 +165,7 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
             top = parent.getPaddingTop();
             bottom = parent.getHeight() - parent.getPaddingBottom();
             canvas.clipRect(parent.getPaddingLeft(), top,
-                    parent.getWidth() - parent.getPaddingRight(), bottom);
+                            parent.getWidth() - parent.getPaddingRight(), bottom);
         } else {
             top = 0;
             bottom = parent.getHeight();
@@ -182,8 +184,8 @@ public class InstallerXAdapterDividerItemDecoration extends RecyclerView.ItemDec
     }
 
     @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
-                               RecyclerView.State state) {
+    public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
+                               @NonNull RecyclerView.State state) {
         if (mDivider == null) {
             outRect.set(0, 0, 0, 0);
             return;

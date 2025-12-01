@@ -17,8 +17,8 @@ import java.util.zip.ZipInputStream;
 
 public class ZipApkSource implements ZipBackedApkSource {
 
-    private Context mContext;
-    private FileDescriptor mZipFileDescriptor;
+    private final Context mContext;
+    private final FileDescriptor mZipFileDescriptor;
     private boolean mIsOpen;
     private int mSeenApkFiles = 0;
 
@@ -44,18 +44,21 @@ public class ZipApkSource implements ZipBackedApkSource {
             try {
                 mCurrentZipEntry = mZipInputStream.getNextEntry();
             } catch (ZipException e) {
-                if (e.getMessage().equals("only DEFLATED entries can have EXT descriptor")) {
+                if ("only DEFLATED entries can have EXT descriptor".equals(e.getMessage())) {
                     throw new ZipException(mContext.getString(R.string.installer_recoverable_error_use_zipfile));
                 }
                 throw e;
             }
-        } while (mCurrentZipEntry != null && (mCurrentZipEntry.isDirectory() || !mCurrentZipEntry.getName().toLowerCase().endsWith(".apk")));
+        } while (mCurrentZipEntry != null && (mCurrentZipEntry.isDirectory() || !mCurrentZipEntry.getName()
+                                                                                                 .toLowerCase()
+                                                                                                 .endsWith(".apk")));
 
         if (mCurrentZipEntry == null) {
             mZipInputStream.close();
 
-            if (mSeenApkFiles == 0)
+            if (mSeenApkFiles == 0) {
                 throw new IllegalArgumentException(mContext.getString(R.string.installer_error_zip_contains_no_apks));
+            }
 
             return false;
         }
@@ -86,8 +89,9 @@ public class ZipApkSource implements ZipBackedApkSource {
 
     @Override
     public void close() throws Exception {
-        if (mZipInputStream != null)
+        if (mZipInputStream != null) {
             mZipInputStream.close();
+        }
     }
 
     @Nullable
@@ -112,7 +116,7 @@ public class ZipApkSource implements ZipBackedApkSource {
      **/
     private static class ZipInputStreamWrapper extends InputStream {
 
-        private ZipInputStream mWrappedStream;
+        private final ZipInputStream mWrappedStream;
 
         private ZipInputStreamWrapper(ZipInputStream inputStream) {
             mWrappedStream = inputStream;

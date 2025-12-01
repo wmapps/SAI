@@ -36,7 +36,7 @@ public class DarkLightThemeSelectionDialogFragment extends BaseBottomSheetDialog
     /**
      * Same as {@link #newInstance(int)} with {@link #MODE_CHOOSE}
      *
-     * @return
+     * @return the dark light theme selection dialog fragment
      */
     public static DarkLightThemeSelectionDialogFragment newInstance() {
         return newInstance(MODE_CHOOSE);
@@ -66,7 +66,8 @@ public class DarkLightThemeSelectionDialogFragment extends BaseBottomSheetDialog
 
     @Nullable
     @Override
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.dialog_dark_light_theme_selection, container, false);
     }
 
@@ -80,8 +81,11 @@ public class DarkLightThemeSelectionDialogFragment extends BaseBottomSheetDialog
         getPositiveButton().setOnClickListener(v -> {
             if (mMode == MODE_CHOOSE) {
                 OnDarkLightThemesChosenListener listener = Utils.getParentAs(this, OnDarkLightThemesChosenListener.class);
-                if (listener != null)
-                    listener.onThemesChosen(getTag(), mViewModel.getLightTheme().getValue(), mViewModel.getDarkTheme().getValue());
+                if (listener != null) {
+                    listener.onThemesChosen(getTag(),
+                                            mViewModel.getLightTheme().getValue(),
+                                            mViewModel.getDarkTheme().getValue());
+                }
             } else {
                 Theme theme = Theme.getInstance(requireContext());
                 theme.setLightTheme(mViewModel.getLightTheme().getValue());
@@ -97,8 +101,12 @@ public class DarkLightThemeSelectionDialogFragment extends BaseBottomSheetDialog
         lightThemeView.setMessage(R.string.auto_theme_selection_hint);
         darkThemeView.setMessage(R.string.auto_theme_selection_hint);
 
-        lightThemeView.setOnClickListener(v -> ThemeSelectionDialogFragment.newInstance(ThemeSelectionDialogFragment.MODE_CHOOSE).show(getChildFragmentManager(), TAG_CHOOSE_LIGHT_THEME));
-        darkThemeView.setOnClickListener(v -> ThemeSelectionDialogFragment.newInstance(ThemeSelectionDialogFragment.MODE_CHOOSE).show(getChildFragmentManager(), TAG_CHOOSE_DARK_THEME));
+        lightThemeView.setOnClickListener(v -> ThemeSelectionDialogFragment.newInstance(ThemeSelectionDialogFragment.MODE_CHOOSE)
+                                                                           .show(getChildFragmentManager(),
+                                                                                 TAG_CHOOSE_LIGHT_THEME));
+        darkThemeView.setOnClickListener(v -> ThemeSelectionDialogFragment.newInstance(ThemeSelectionDialogFragment.MODE_CHOOSE)
+                                                                          .show(getChildFragmentManager(),
+                                                                                TAG_CHOOSE_DARK_THEME));
 
         mViewModel.getLightTheme().observe(this, lightThemeView::setTheme);
         mViewModel.getDarkTheme().observe(this, darkThemeView::setTheme);

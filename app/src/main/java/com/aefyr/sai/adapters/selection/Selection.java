@@ -13,24 +13,26 @@ import java.util.Set;
 
 public class Selection<Key> {
 
-    private KeyStorage<Key> mKeyStorage;
+    private final KeyStorage<Key> mKeyStorage;
 
-    private Set<Observer<Key>> mObservers = new HashSet<>();
-    private MutableLiveData<Selection<Key>> mLiveSelection = new MutableLiveData<>(this);
+    private final Set<Observer<Key>> mObservers = new HashSet<>();
+    private final MutableLiveData<Selection<Key>> mLiveSelection = new MutableLiveData<>(this);
 
-    public Selection(KeyStorage keyStorage) {
+    public Selection(KeyStorage<Key> keyStorage) {
         mKeyStorage = keyStorage;
     }
 
     public void setSelected(Key key, boolean selected) {
         boolean currentlySelected = mKeyStorage.isStored(key);
-        if ((currentlySelected && selected) || (!currentlySelected && !selected))
+        if ((currentlySelected && selected) || (!currentlySelected && !selected)) {
             return;
+        }
 
-        if (selected)
+        if (selected) {
             mKeyStorage.store(key);
-        else
+        } else {
             mKeyStorage.remove(key);
+        }
 
         for (Observer<Key> observer : mObservers) {
             observer.onKeySelectionChanged(this, key, selected);
@@ -46,10 +48,11 @@ public class Selection<Key> {
      * @param selected new selection status of given keys
      */
     public void batchSetSelected(Collection<Key> keys, boolean selected) {
-        if (selected)
+        if (selected) {
             mKeyStorage.storeAll(keys);
-        else
+        } else {
             mKeyStorage.removeAll(keys);
+        }
 
         for (Observer<Key> observer : mObservers) {
             observer.onMultipleKeysSelectionChanged(this, keys, selected);
@@ -89,8 +92,9 @@ public class Selection<Key> {
     }
 
     public void observe(LifecycleOwner lifecycleOwner, Observer<Key> observer) {
-        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED)
+        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             return;
+        }
 
         addObserver(observer);
         lifecycleOwner.getLifecycle().addObserver(new DefaultLifecycleObserver() {

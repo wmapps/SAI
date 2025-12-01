@@ -47,7 +47,9 @@ public class DonationSuggestionDialogFragment extends BaseBottomSheetDialogFragm
 
         getPositiveButton().setText(R.string.donate_dialog_go_to_donate_page);
         getPositiveButton().setOnClickListener(v -> {
-            final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Aefyr"));
+            final Intent intent = new Intent(Intent.ACTION_VIEW,
+                                             Uri.parse("https://github.com/Aefyr")).setPackage(view.getContext()
+                                                                                                   .getPackageName());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             setShownAndDismiss();

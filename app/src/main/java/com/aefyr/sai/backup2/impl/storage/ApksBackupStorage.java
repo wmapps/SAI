@@ -47,26 +47,21 @@ import java.util.zip.ZipInputStream;
 
 public abstract class ApksBackupStorage extends BaseBackupStorage {
     private static final String TAG = "ApksBackupStorage";
-    private static Uri EMPTY_ICON = new Uri.Builder().scheme("no").authority("icon").build();
+    private static final Uri EMPTY_ICON = new Uri.Builder().scheme("no").authority("icon").build();
 
+    private final ExecutorService mTaskExecutor = Executors.newFixedThreadPool(4);
 
-    private ExecutorService mTaskExecutor = Executors.newFixedThreadPool(4);
+    @GuardedBy("mTasks") private final Map<String, SingleBackupTaskConfig> mTasks = new HashMap<>();
+    @GuardedBy("mTaskExecutors") private final Map<String, CancellableBackupTaskExecutor> mTaskExecutors = new HashMap<>();
 
-    @GuardedBy("mTasks")
-    private final Map<String, SingleBackupTaskConfig> mTasks = new HashMap<>();
-    @GuardedBy("mTaskExecutors")
-    private final Map<String, CancellableBackupTaskExecutor> mTaskExecutors = new HashMap<>();
+    @GuardedBy("mBatchTasks") private final Map<String, BatchBackupTaskConfig> mBatchTasks = new HashMap<>();
 
-    @GuardedBy("mBatchTasks")
-    private final Map<String, BatchBackupTaskConfig> mBatchTasks = new HashMap<>();
-
-    private HandlerThread mTaskProgressHandlerThread;
-    private Handler mTaskProgressHandler;
+    private final Handler mTaskProgressHandler;
 
     protected ApksBackupStorage() {
-        mTaskProgressHandlerThread = new HandlerThread("ApksBackupStorage.TaskProgress");
-        mTaskProgressHandlerThread.start();
-        mTaskProgressHandler = new Handler(mTaskProgressHandlerThread.getLooper());
+        final HandlerThread taskProgressHandlerThread = new HandlerThread("ApksBackupStorage.TaskProgress");
+        taskProgressHandlerThread.start();
+        mTaskProgressHandler = new Handler(taskProgressHandlerThread.getLooper());
     }
 
     protected abstract Context getContext();
@@ -89,9 +84,10 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
         try (ZipInputStream zipInputStream = new ZipInputStream(openFileInputStream(uri))) {
             ZipEntry zipEntry;
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                if (zipEntry.getName().equals(SaiExportedAppMeta.META_FILE)) {
-                    if (mutableBackup != null)
+                if (SaiExportedAppMeta.META_FILE.equals(zipEntry.getName())) {
+                    if (mutableBackup != null) {
                         continue;
+                    }
 
                     SaiExportedAppMeta appMeta = SaiExportedAppMeta.deserialize(IOUtils.readStreamNoClose(zipInputStream));
                     mutableBackup = new MutableBackup();
@@ -104,8 +100,9 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
                     mutableBackup.versionName = appMeta.versionName();
                     mutableBackup.exportTimestamp = appMeta.exportTime();
                     mutableBackup.storageId = getStorageId();
-                    mutableBackup.components = Collections.singletonList(new SimpleBackupComponent(StandardComponentTypes.TYPE_APK_FILES, getFileSize(uri)));
-                } else if (zipEntry.getName().equals(SaiExportedAppMeta2.META_FILE)) {
+                    mutableBackup.components = Collections.singletonList(new SimpleBackupComponent(StandardComponentTypes.TYPE_APK_FILES,
+                                                                                                   getFileSize(uri)));
+                } else if (SaiExportedAppMeta2.META_FILE.equals(zipEntry.getName())) {
                     SaiExportedAppMeta2 appMeta = SaiExportedAppMeta2.deserialize(IOUtils.readStreamNoClose(zipInputStream));
                     mutableBackup = new MutableBackup();
                     mutableBackup.uri = uri;
@@ -121,23 +118,27 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
 
                     List<BackupComponent> backupComponents = new ArrayList<>();
-                    if (appMeta.backupComponents() != null) {
-                        for (SaiExportedAppMeta2.BackupComponent backupComponent : appMeta.backupComponents()) {
+                    final List<SaiExportedAppMeta2.BackupComponent> components = appMeta.backupComponents();
+                    if (components != null) {
+                        for (SaiExportedAppMeta2.BackupComponent backupComponent : components) {
                             backupComponents.add(new SimpleBackupComponent(backupComponent.type(), backupComponent.size()));
                         }
                     }
                     mutableBackup.components = backupComponents;
-                } else if (zipEntry.getName().equals(SaiExportedAppMeta.ICON_FILE) || zipEntry.getName().equals(SaiExportedAppMeta2.ICON_FILE)) {
+                } else if (SaiExportedAppMeta.ICON_FILE.equals(zipEntry.getName()) || //
+                           SaiExportedAppMeta2.ICON_FILE.equals(zipEntry.getName())) {
                     cachedIconFile = cacheBackupIcon(zipInputStream);
                 }
 
-                if (mutableBackup != null && cachedIconFile != null)
+                if (mutableBackup != null && cachedIconFile != null) {
                     break;
+                }
             }
         }
 
-        if (mutableBackup == null)
+        if (mutableBackup == null) {
             throw new Exception("Meta file not found in archive");
+        }
 
         if (cachedIconFile != null) {
             mutableBackup.iconUri = wrapIconUri(mutableBackup.uri, cachedIconFile);
@@ -167,46 +168,51 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
         try (ZipInputStream zipInputStream = new ZipInputStream(openFileInputStream(cachedIconFileAndBackupUri.second))) {
             ZipEntry zipEntry;
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                if (zipEntry.getName().equals(SaiExportedAppMeta.ICON_FILE) || zipEntry.getName().equals(SaiExportedAppMeta2.ICON_FILE)) {
+                if (zipEntry.getName().equals(SaiExportedAppMeta.ICON_FILE) || zipEntry.getName()
+                                                                                       .equals(SaiExportedAppMeta2.ICON_FILE)) {
                     return zipInputStream;
                 }
             }
         }
 
-        throw new IOException("Icon gone for icon uri " + iconUri.toString());
+        throw new IOException("Icon gone for icon uri " + iconUri);
     }
 
     /**
      * Make icon uri from cached icon file and backup uri that can be used in {@link #getBackupIcon(Uri)}
      *
-     * @param backupUri
-     * @return
+     * @param backupUri      the backup uri
+     * @param cachedIconFile the cached icon file
+     * @return the uri
      */
     private Uri wrapIconUri(Uri backupUri, File cachedIconFile) {
         return new Uri.Builder().scheme("absi")
-                .authority(BuildConfig.APPLICATION_ID + "." + getStorageId())
-                .appendQueryParameter("cached_icon", cachedIconFile.getAbsolutePath())
-                .appendQueryParameter("backup", backupUri.toString())
-                .build();
+                                .authority(BuildConfig.APPLICATION_ID + "." + getStorageId())
+                                .appendQueryParameter("cached_icon", cachedIconFile.getAbsolutePath())
+                                .appendQueryParameter("backup", backupUri.toString())
+                                .build();
     }
 
     /**
      * Retrieve cached icon file and backup uri from an icon uri created with {@link #wrapIconUri(Uri, File)}
      *
-     * @param iconUri
-     * @return
+     * @param iconUri the icon uri
+     * @return the pair
      */
     private Pair<File, Uri> unwrapIconUri(Uri iconUri) {
-        if (!"absi".equals(iconUri.getScheme()) || !(BuildConfig.APPLICATION_ID + "." + getStorageId()).equals(iconUri.getAuthority()))
-            throw new IllegalArgumentException("Invalid icon uri - " + iconUri.toString());
+        if (!"absi".equals(iconUri.getScheme()) || !(BuildConfig.APPLICATION_ID + "." + getStorageId()).equals(iconUri.getAuthority())) {
+            throw new IllegalArgumentException("Invalid icon uri - " + iconUri);
+        }
 
-        return new Pair<>(new File(iconUri.getQueryParameter("cached_icon")), Uri.parse(iconUri.getQueryParameter("backup")));
+        final String cachedIcon = iconUri.getQueryParameter("cached_icon");
+        return new Pair<>(new File(cachedIcon), Uri.parse(iconUri.getQueryParameter("backup")));
     }
 
     private File cacheBackupIcon(InputStream iconInputStream) throws IOException {
         File cachedIconFile = Utils.createTempFileInCache(getContext(), "ApksBackupStorage.Icons", "png");
-        if (cachedIconFile == null)
+        if (cachedIconFile == null) {
             throw new RuntimeException("Unable to create cached icon file");
+        }
 
         try (FileOutputStream outputStream = new FileOutputStream(cachedIconFile)) {
             IOUtils.copyStream(iconInputStream, outputStream);
@@ -265,7 +271,10 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
         if (config.exportMode() && !supportsApkExport()) {
             notifyBackupTaskStatusChanged(BackupTaskStatus.queued(taskToken, config));
             notifyBackupTaskStatusChanged(BackupTaskStatus.inProgress(taskToken, config, 0, 1));
-            notifyBackupTaskStatusChanged(BackupTaskStatus.failed(taskToken, config, new IllegalArgumentException("APK export is not supported by this storage")));
+            notifyBackupTaskStatusChanged(BackupTaskStatus.failed(taskToken,
+                                                                  config,
+                                                                  new IllegalArgumentException(
+                                                                          "APK export is not supported by this storage")));
             return;
         }
 
@@ -298,7 +307,9 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
             @Override
             public void onError(Exception e) {
-                Log.w(TAG, String.format("Unable to export %s, task token is %s", config.packageMeta().packageName, taskToken), e);
+                Log.w(TAG,
+                      String.format("Unable to export %s, task token is %s", config.packageMeta().packageName, taskToken),
+                      e);
                 notifyBackupTaskStatusChanged(BackupTaskStatus.failed(taskToken, config, e));
             }
         }, mTaskProgressHandler);
@@ -310,11 +321,12 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
     }
 
     private void startBatchBackupTask(String taskToken, BatchBackupTaskConfig batchConfig) {
-        BatchBackupTaskExecutor taskExecutor = new BatchBackupTaskExecutor(getContext(), batchConfig, new InternalSingleBackupTaskExecutorFactory());
+        BatchBackupTaskExecutor taskExecutor = new BatchBackupTaskExecutor(batchConfig,
+                                                                           new InternalSingleBackupTaskExecutorFactory());
         taskExecutor.setListener(new BatchBackupTaskExecutor.Listener() {
 
-            private Map<SingleBackupTaskConfig, Backup> mSucceededBackups = new HashMap<>();
-            private Map<SingleBackupTaskConfig, Exception> mFailedBackups = new HashMap<>();
+            private final Map<SingleBackupTaskConfig, Backup> mSucceededBackups = new HashMap<>();
+            private final Map<SingleBackupTaskConfig, Exception> mFailedBackups = new HashMap<>();
 
             @Override
             public void onStart() {
@@ -323,7 +335,11 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
             @Override
             public void onAppBackupStarted(SingleBackupTaskConfig config) {
-                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.inProgress(taskToken, config, batchConfig.configs().size(), mSucceededBackups.size(), mFailedBackups.size()));
+                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.inProgress(taskToken,
+                                                                                    config,
+                                                                                    batchConfig.configs().size(),
+                                                                                    mSucceededBackups.size(),
+                                                                                    mFailedBackups.size()));
             }
 
             @Override
@@ -339,7 +355,10 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
             @Override
             public void onCancelled(List<SingleBackupTaskConfig> cancelledBackups) {
-                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.cancelled(taskToken, mSucceededBackups, mFailedBackups, cancelledBackups));
+                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.cancelled(taskToken,
+                                                                                   mSucceededBackups,
+                                                                                   mFailedBackups,
+                                                                                   cancelledBackups));
             }
 
             @Override
@@ -349,7 +368,11 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
             @Override
             public void onError(Exception e, List<SingleBackupTaskConfig> remainingBackups) {
-                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.failed(taskToken, mSucceededBackups, mFailedBackups, remainingBackups, e));
+                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.failed(taskToken,
+                                                                                mSucceededBackups,
+                                                                                mFailedBackups,
+                                                                                remainingBackups,
+                                                                                e));
             }
         }, mTaskProgressHandler);
         synchronized (mTaskExecutors) {
@@ -372,15 +395,19 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
         synchronized (mBatchTasks) {
             BatchBackupTaskConfig batchConfig = mBatchTasks.remove(taskToken);
             if (batchConfig != null) {
-                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.cancelled(taskToken, Collections.emptyMap(), Collections.emptyMap(), batchConfig.configs()));
+                notifyBatchBackupTaskStatusChanged(BatchBackupTaskStatus.cancelled(taskToken,
+                                                                                   Collections.emptyMap(),
+                                                                                   Collections.emptyMap(),
+                                                                                   batchConfig.configs()));
                 return;
             }
         }
 
         synchronized (mTaskExecutors) {
             CancellableBackupTaskExecutor taskExecutor = mTaskExecutors.get(taskToken);
-            if (taskExecutor != null)
+            if (taskExecutor != null) {
                 taskExecutor.requestCancellation();
+            }
         }
     }
 
@@ -390,14 +417,16 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
         //TODO use a single map for both classes or something
         synchronized (mTasks) {
             SingleBackupTaskConfig config = mTasks.get(taskToken);
-            if (config != null)
+            if (config != null) {
                 return config;
+            }
         }
 
         synchronized (mBatchTasks) {
             BatchBackupTaskConfig batchConfig = mBatchTasks.get(taskToken);
-            if (batchConfig != null)
+            if (batchConfig != null) {
                 return batchConfig;
+            }
         }
 
         return null;
@@ -405,7 +434,7 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
     private class InternalDelegatedFile implements ApksSingleBackupTaskExecutor.DelegatedFile {
 
-        private SingleBackupTaskConfig mConfig;
+        private final SingleBackupTaskConfig mConfig;
         private Uri mUri;
 
         private InternalDelegatedFile(SingleBackupTaskConfig config) {
@@ -420,8 +449,9 @@ public abstract class ApksBackupStorage extends BaseBackupStorage {
 
         @Override
         public void delete() {
-            if (mUri == null)
+            if (mUri == null) {
                 return;
+            }
 
             deleteFile(mUri);
         }

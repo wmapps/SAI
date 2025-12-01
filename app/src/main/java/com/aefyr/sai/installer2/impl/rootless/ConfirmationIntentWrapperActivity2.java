@@ -31,7 +31,7 @@ public class ConfirmationIntentWrapperActivity2 extends AppCompatActivity {
         mSessionId = intent.getIntExtra(EXTRA_SESSION_ID, -1);
         mConfirmationIntent = intent.getParcelableExtra(EXTRA_CONFIRMATION_INTENT);
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && mConfirmationIntent != null) {
             try {
                 startActivityForResult(mConfirmationIntent, REQUEST_CODE_CONFIRM_INSTALLATION);
             } catch (Exception e) {
@@ -56,8 +56,11 @@ public class ConfirmationIntentWrapperActivity2 extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (isFinishing() && !mFinishedProperly)
-            start(this, mSessionId, mConfirmationIntent); //Because if user doesn't confirm/cancel the installation, PackageInstaller session will hang
+        if (isFinishing() && !mFinishedProperly) {
+            start(this,
+                  mSessionId,
+                  mConfirmationIntent); //Because if user doesn't confirm/cancel the installation, PackageInstaller session will hang
+        }
 
     }
 

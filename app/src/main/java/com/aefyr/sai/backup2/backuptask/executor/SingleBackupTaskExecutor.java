@@ -18,15 +18,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SingleBackupTaskExecutor implements CancellableBackupTaskExecutor {
 
-    private Context mContext;
-    private SingleBackupTaskConfig mConfig;
-    private DelegatedFile mDelegatedFile;
+    private final Context mContext;
+    private final SingleBackupTaskConfig mConfig;
+    private final DelegatedFile mDelegatedFile;
 
     private Listener mListener;
     private Handler mListenerHandler;
 
-    private AtomicBoolean mIsStarted = new AtomicBoolean(false);
-    private AtomicBoolean mIsCancelled = new AtomicBoolean(false);
+    private final AtomicBoolean mIsStarted = new AtomicBoolean(false);
+    private final AtomicBoolean mIsCancelled = new AtomicBoolean(false);
 
     public SingleBackupTaskExecutor(Context context, SingleBackupTaskConfig config, DelegatedFile delegatedFile) {
         mContext = context.getApplicationContext();
@@ -77,13 +77,15 @@ public abstract class SingleBackupTaskExecutor implements CancellableBackupTaskE
     }
 
     protected void ensureNotStarted() {
-        if (mIsStarted.get())
+        if (mIsStarted.get()) {
             throw new IllegalStateException("Unable to call this method after execution has been started");
+        }
     }
 
     protected void ensureNotCancelled() throws TaskCancelledException {
-        if (isCancelled())
+        if (isCancelled()) {
             throw new TaskCancelledException();
+        }
     }
 
     protected List<File> getAllApkFilesForPackage(String pkg) throws Exception {
@@ -93,36 +95,42 @@ public abstract class SingleBackupTaskExecutor implements CancellableBackupTaskE
         apkFiles.add(new File(applicationInfo.publicSourceDir));
 
         if (applicationInfo.splitPublicSourceDirs != null) {
-            for (String splitPath : applicationInfo.splitPublicSourceDirs)
+            for (String splitPath : applicationInfo.splitPublicSourceDirs) {
                 apkFiles.add(new File(splitPath));
+            }
         }
 
         return apkFiles;
     }
 
     protected void notifyStarted() {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onStart());
+        }
     }
 
     protected void notifyProgressChanged(long current, long goal) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onProgressChanged(current, goal));
+        }
     }
 
     protected void notifyCancelled() {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onCancelled());
+        }
     }
 
     protected void notifySucceeded(@Nullable Backup backup) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onSuccess(backup));
+        }
     }
 
     protected void notifyFailed(Exception e) {
-        if (mListener != null)
+        if (mListener != null) {
             mListenerHandler.post(() -> mListener.onError(e));
+        }
     }
 
     public interface DelegatedFile {

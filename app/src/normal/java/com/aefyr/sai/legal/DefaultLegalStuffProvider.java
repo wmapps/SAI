@@ -1,20 +1,15 @@
 package com.aefyr.sai.legal;
 
-import android.content.Context;
-
 public class DefaultLegalStuffProvider implements LegalStuffProvider {
 
     private static DefaultLegalStuffProvider sInstance;
 
-    private Context mContext;
 
-    public static synchronized DefaultLegalStuffProvider getInstance(Context context) {
-        return sInstance != null ? sInstance : new DefaultLegalStuffProvider(context);
+    public static synchronized DefaultLegalStuffProvider getInstance() {
+        return sInstance != null ? sInstance : new DefaultLegalStuffProvider();
     }
 
-    private DefaultLegalStuffProvider(Context context) {
-        mContext = context.getApplicationContext();
-
+    private DefaultLegalStuffProvider() {
         sInstance = this;
     }
 

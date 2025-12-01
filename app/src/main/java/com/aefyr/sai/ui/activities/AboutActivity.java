@@ -22,20 +22,24 @@ public class AboutActivity extends ThemedActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        mLegalStuffProvider = DefaultLegalStuffProvider.getInstance(this);
+        mLegalStuffProvider = DefaultLegalStuffProvider.getInstance();
 
-        ((TextView) findViewById(R.id.tv_about_app)).setText(String.format("%s %s", getString(R.string.app_name_full), BuildConfig.VERSION_NAME));
+        ((TextView) findViewById(R.id.tv_about_app)).setText(String.format("%s %s",
+                                                                           getString(R.string.app_name_full),
+                                                                           BuildConfig.VERSION_NAME));
         findViewById(R.id.button_about_source).setOnClickListener((v) -> openLink(getString(R.string.about_source_link)));
         findViewById(R.id.button_about_donate).setOnClickListener((v) -> openLink(getString(R.string.about_donate_link)));
-        findViewById(R.id.button_about_licenses).setOnClickListener((v) -> startActivity(new Intent(this, LicensesActivity.class)));
+        findViewById(R.id.button_about_licenses).setOnClickListener((v) -> startActivity(new Intent(this,
+                                                                                                    LicensesActivity.class)));
         findViewById(R.id.button_about_translate).setOnClickListener(v -> openLink(getString(R.string.about_translate_link)));
         findViewById(R.id.button_about_privacy_policy).setOnClickListener(v -> openLink(mLegalStuffProvider.getPrivacyPolicyUrl()));
         findViewById(R.id.button_about_eula).setOnClickListener(v -> openLink(mLegalStuffProvider.getEulaUrl()));
 
         findViewById(R.id.iv_about_logo).setOnClickListener((v) -> sLogoClicksCount++);
         findViewById(R.id.iv_about_logo).setOnLongClickListener((v) -> {
-            if (sLogoClicksCount >= 3)
+            if (sLogoClicksCount >= 3) {
                 PreferencesActivity.open(this, SuperSecretPreferencesFragment.class, getString(R.string.sss));
+            }
 
             return sLogoClicksCount >= 3;
         });
@@ -49,7 +53,7 @@ public class AboutActivity extends ThemedActivity {
     }
 
     private void openLink(String link) {
-        Intent openLinkIntent = new Intent(Intent.ACTION_VIEW);
+        Intent openLinkIntent = new Intent(Intent.ACTION_VIEW).setPackage(getPackageName());
         openLinkIntent.setData(Uri.parse(link));
         startActivity(openLinkIntent);
     }

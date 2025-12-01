@@ -19,12 +19,13 @@ import java.util.List;
 
 public class BackupNameFormatBuilderPartsAdapter extends SelectableAdapter<BackupNameFormatBuilder.Part, BackupNameFormatBuilderPartsAdapter.ViewHolder> {
 
-    private Context mContext;
-    private LayoutInflater mInflater;
+    private final Context mContext;
+    private final LayoutInflater mInflater;
 
     private List<BackupNameFormatBuilder.Part> mParts;
 
-    public BackupNameFormatBuilderPartsAdapter(Selection<BackupNameFormatBuilder.Part> selection, LifecycleOwner lifecycleOwner, Context c) {
+    public BackupNameFormatBuilderPartsAdapter(Selection<BackupNameFormatBuilder.Part> selection, LifecycleOwner lifecycleOwner,
+                                               Context c) {
         super(selection, lifecycleOwner);
         mContext = c;
         mInflater = LayoutInflater.from(c);
@@ -63,7 +64,7 @@ public class BackupNameFormatBuilderPartsAdapter extends SelectableAdapter<Backu
         return mParts == null ? 0 : mParts.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private boolean mPauseCheckedListener = false;
 
@@ -72,12 +73,14 @@ public class BackupNameFormatBuilderPartsAdapter extends SelectableAdapter<Backu
             itemView.requestFocus();
 
             ((Chip) itemView).setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (mPauseCheckedListener)
+                if (mPauseCheckedListener) {
                     return;
+                }
 
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
                 setSelected(getKeyForPosition(adapterPosition), isChecked);
             });

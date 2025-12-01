@@ -31,7 +31,9 @@ public class UriDirectoryPickerDialogFragment extends SingleChoiceListDialogFrag
         UriDirectoryPickerDialogFragment fragment = new UriDirectoryPickerDialogFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(ARG_PARAMS, new DialogParams(context.getText(R.string.settings_main_backup_backup_dir_dialog), R.array.backup_dir_selection_methods));
+        args.putParcelable(ARG_PARAMS,
+                           new DialogParams(context.getText(R.string.settings_main_backup_backup_dir_dialog),
+                                            R.array.backup_dir_selection_methods));
         fragment.setArguments(args);
 
         return fragment;
@@ -46,11 +48,14 @@ public class UriDirectoryPickerDialogFragment extends SingleChoiceListDialogFrag
                 properties.selection_type = DialogConfigs.DIR_SELECT;
                 properties.root = Environment.getExternalStorageDirectory();
 
-                openFilePicker(FilePickerDialogFragment.newInstance("backup_dir", getString(R.string.settings_main_pick_dir), properties));
+                openFilePicker(FilePickerDialogFragment.newInstance("backup_dir",
+                                                                    getString(R.string.settings_main_pick_dir),
+                                                                    properties));
                 break;
             case 1:
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                startActivityForResult(Intent.createChooser(intent, getString(R.string.installer_pick_apks)), REQUEST_CODE_SELECT_BACKUP_DIR);
+                startActivityForResult(Intent.createChooser(intent, getString(R.string.installer_pick_apks)),
+                                       REQUEST_CODE_SELECT_BACKUP_DIR);
                 break;
         }
     }
@@ -68,9 +73,9 @@ public class UriDirectoryPickerDialogFragment extends SingleChoiceListDialogFrag
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PermissionsUtils.REQUEST_CODE_STORAGE_PERMISSIONS) {
-            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
+            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_storage);
-            else {
+            } else {
                 if (mPendingFilePicker != null) {
                     openFilePicker(mPendingFilePicker);
                     mPendingFilePicker = null;
@@ -84,12 +89,15 @@ public class UriDirectoryPickerDialogFragment extends SingleChoiceListDialogFrag
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_SELECT_BACKUP_DIR) {
-            if (resultCode != Activity.RESULT_OK)
+            if (resultCode != Activity.RESULT_OK) {
                 return;
+            }
 
             Objects.requireNonNull(data);
             Uri backupDirUri = Objects.requireNonNull(data.getData());
-            requireContext().getContentResolver().takePersistableUriPermission(backupDirUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            requireContext().getContentResolver()
+                            .takePersistableUriPermission(backupDirUri,
+                                                          Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             onDirectoryPicked(backupDirUri);
         }
@@ -97,21 +105,20 @@ public class UriDirectoryPickerDialogFragment extends SingleChoiceListDialogFrag
 
     private void onDirectoryPicked(Uri dirUri) {
         OnDirectoryPickedListener listener = Utils.getParentAs(this, OnDirectoryPickedListener.class);
-        if (listener != null)
+        if (listener != null) {
             listener.onDirectoryPicked(getTag(), dirUri);
+        }
 
         dismiss();
     }
 
     @Override
     public void onFilesSelected(String tag, List<File> files) {
-        switch (tag) {
-            case "backup_dir":
-                onDirectoryPicked(new Uri.Builder()
-                        .scheme("file")
-                        .path(files.get(0).getAbsolutePath())
-                        .build());
-                break;
+        if ("backup_dir".equals(tag)) {
+            onDirectoryPicked(new Uri.Builder()
+                                      .scheme("file")
+                                      .path(files.get(0).getAbsolutePath())
+                                      .build());
         }
     }
 

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context="com.aefyr.sai.ui.activities.BackupManageAppActivity">
 
-    <com.aefyr.sai.view.coolbar.Coolbar
+    <com.aefyr.sai.view.coolbar.CoolBar
         android:id="@+id/coolbar_backup_manage_app"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -25,7 +25,7 @@
             app:coolbar_gravity="end"
             app:srcCompat="@drawable/ic_more"
             tools:ignore="MissingPrefix" />
-    </com.aefyr.sai.view.coolbar.Coolbar>
+    </com.aefyr.sai.view.coolbar.CoolBar>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_backup_app_details"

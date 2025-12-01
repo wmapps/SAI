@@ -20,8 +20,9 @@ public class Event2 {
     }
 
     public <T> T consume() {
-        if (mConsumed)
+        if (mConsumed) {
             return null;
+        }
 
         mConsumed = true;
         return (T) mData;

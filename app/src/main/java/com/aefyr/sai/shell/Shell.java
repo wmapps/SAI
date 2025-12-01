@@ -19,7 +19,7 @@ public interface Shell {
     String makeLiteral(String arg);
 
     class Command {
-        private ArrayList<String> mArgs = new ArrayList<>();
+        private final ArrayList<String> mArgs = new ArrayList<>();
 
         public Command(String command, String... args) {
             mArgs.add(command);
@@ -29,8 +29,9 @@ public interface Shell {
         public String[] toStringArray() {
             String[] array = new String[mArgs.size()];
 
-            for (int i = 0; i < mArgs.size(); i++)
+            for (int i = 0; i < mArgs.size(); i++) {
                 array[i] = mArgs.get(i);
+            }
 
             return array;
         }
@@ -43,15 +44,16 @@ public interface Shell {
             for (int i = 0; i < mArgs.size(); i++) {
                 String arg = mArgs.get(i);
                 sb.append(arg);
-                if (i < mArgs.size() - 1)
+                if (i < mArgs.size() - 1) {
                     sb.append(" ");
+                }
             }
 
             return sb.toString();
         }
 
         public static class Builder {
-            private Command mCommand;
+            private final Command mCommand;
 
             public Builder(String command, String... args) {
                 mCommand = new Command(command, args);

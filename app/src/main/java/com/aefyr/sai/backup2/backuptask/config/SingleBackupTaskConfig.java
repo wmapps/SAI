@@ -23,9 +23,9 @@ public class SingleBackupTaskConfig implements Parcelable, BackupTaskConfig {
             return new SingleBackupTaskConfig[size];
         }
     };
-    private String mBackupStorageId;
-    private PackageMeta mPackageMeta;
-    private ArrayList<File> mApksToBackup = new ArrayList<>();
+    private final String mBackupStorageId;
+    private final PackageMeta mPackageMeta;
+    private final ArrayList<File> mApksToBackup = new ArrayList<>();
     private boolean mExportMode = false;
 
     private SingleBackupTaskConfig(String backupStorageId, PackageMeta packageMeta) {
@@ -39,8 +39,9 @@ public class SingleBackupTaskConfig implements Parcelable, BackupTaskConfig {
 
         ArrayList<String> apkFilePaths = new ArrayList<>();
         in.readStringList(apkFilePaths);
-        for (String apkFilePath : apkFilePaths)
+        for (String apkFilePath : apkFilePaths) {
             mApksToBackup.add(new File(apkFilePath));
+        }
 
         mExportMode = in.readByte() == 1;
     }
@@ -68,8 +69,9 @@ public class SingleBackupTaskConfig implements Parcelable, BackupTaskConfig {
         dest.writeParcelable(mPackageMeta, flags);
 
         ArrayList<String> apkFilePaths = new ArrayList<>();
-        for (File apkFile : mApksToBackup)
+        for (File apkFile : mApksToBackup) {
             apkFilePaths.add(apkFile.getAbsolutePath());
+        }
         dest.writeStringList(apkFilePaths);
 
         dest.writeByte((byte) (mExportMode ? 1 : 0));
@@ -81,7 +83,7 @@ public class SingleBackupTaskConfig implements Parcelable, BackupTaskConfig {
     }
 
     public static class Builder {
-        private SingleBackupTaskConfig mConfig;
+        private final SingleBackupTaskConfig mConfig;
 
         public Builder(String backupStorageId, PackageMeta packageMeta) {
             mConfig = new SingleBackupTaskConfig(backupStorageId, packageMeta);

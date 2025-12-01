@@ -8,7 +8,7 @@ import androidx.preference.PreferenceManager;
 public class DbgPreferencesHelper {
     private static DbgPreferencesHelper sInstance;
 
-    private SharedPreferences mPrefs;
+    private final SharedPreferences mPrefs;
 
     public static DbgPreferencesHelper getInstance(Context c) {
         return sInstance != null ? sInstance : new DbgPreferencesHelper(c);
@@ -25,8 +25,9 @@ public class DbgPreferencesHelper {
 
     public String getCustomInstallCreateCommand() {
         String command = mPrefs.getString(DbgPreferencesKeys.CUSTOM_INSTALL_CREATE, "null");
-        if ("null".equalsIgnoreCase(command))
+        if ("null".equalsIgnoreCase(command)) {
             return null;
+        }
 
         return command;
     }

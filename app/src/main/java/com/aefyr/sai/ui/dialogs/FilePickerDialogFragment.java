@@ -37,7 +37,7 @@ public class FilePickerDialogFragment extends DialogFragment {
 
     private String mTag;
     private String mTitle = "Select files";
-    private DialogProperties mDialogProperties = new DialogProperties();
+    private final DialogProperties mDialogProperties = new DialogProperties();
 
     public static FilePickerDialogFragment newInstance(String tag, String title, DialogProperties properties) {
         FilePickerDialogFragment fragment = new FilePickerDialogFragment();
@@ -66,8 +66,9 @@ public class FilePickerDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
+        }
 
         mTag = args.getString(ARG_TAG);
         mTitle = args.getString(ARG_TITLE);
@@ -85,15 +86,19 @@ public class FilePickerDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        FilePickerDialog dialog = new FilePickerDialog(getContext(), mDialogProperties, Theme.getInstance(getContext()).getCurrentTheme().getTheme());
+        FilePickerDialog dialog = new FilePickerDialog(getContext(),
+                                                       mDialogProperties,
+                                                       Theme.getInstance(getContext()).getCurrentTheme().getTheme());
         dialog.setDialogSelectionListener((files) -> {
-            if (mListener == null)
+            if (mListener == null) {
                 return;
+            }
 
             ArrayList<File> selectedFiles = new ArrayList<>(files.length);
 
-            for (String file : files)
+            for (String file : files) {
                 selectedFiles.add(new File(file));
+            }
 
             mListener.onFilesSelected(mTag, selectedFiles);
         });
@@ -105,12 +110,14 @@ public class FilePickerDialogFragment extends DialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            if (getParentFragment() != null)
+            if (getParentFragment() != null) {
                 mListener = (OnFilesSelectedListener) getParentFragment();
-            else
+            } else {
                 mListener = (OnFilesSelectedListener) getActivity();
+            }
         } catch (Exception e) {
-            throw new IllegalStateException("Activity/Fragment that uses FilePickerDialogFragment must implement FilePickerDialogFragment.OnFilesSelectedListener");
+            throw new IllegalStateException(
+                    "Activity/Fragment that uses FilePickerDialogFragment must implement FilePickerDialogFragment.OnFilesSelectedListener");
         }
     }
 

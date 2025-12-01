@@ -18,6 +18,7 @@ package com.aefyr.sai.installerx.util;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -467,22 +468,18 @@ public class AndroidBinXmlParser {
         }
 
         public float getFloatValue() throws XmlParserException {
-            switch (mValueType) {
-                case TYPE_FLOAT:
-                    return Float.intBitsToFloat(mValueData);
-                default:
-                    throw new XmlParserException("Cannot coerce to float: value type " + mValueType);
+            if (mValueType == TYPE_FLOAT) {
+                return Float.intBitsToFloat(mValueData);
             }
+            throw new XmlParserException("Cannot coerce to float: value type " + mValueType);
         }
 
         public boolean getBooleanValue() throws XmlParserException {
-            switch (mValueType) {
-                case TYPE_INT_BOOLEAN:
-                    return mValueData != 0;
-                default:
-                    throw new XmlParserException(
-                            "Cannot coerce to boolean: value type " + mValueType);
+            if (mValueType == TYPE_INT_BOOLEAN) {
+                return mValueData != 0;
             }
+            throw new XmlParserException(
+                    "Cannot coerce to boolean: value type " + mValueType);
         }
 
         public String getStringValue() throws XmlParserException {
@@ -712,11 +709,7 @@ public class AndroidBinXmlParser {
                     || (arr[arrOffset + lengthBytes + 1] != 0)) {
                 throw new XmlParserException("UTF-16 encoded form of string not NULL terminated");
             }
-            try {
-                return new String(arr, arrOffset, lengthBytes, "UTF-16LE");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("UTF-16LE character encoding not supported", e);
-            }
+            return new String(arr, arrOffset, lengthBytes, StandardCharsets.UTF_16LE);
         }
 
         private static String getLengthPrefixedUtf8EncodedString(ByteBuffer encoded)
@@ -750,11 +743,7 @@ public class AndroidBinXmlParser {
             if (arr[arrOffset + lengthBytes] != 0) {
                 throw new XmlParserException("UTF-8 encoded form of string not NULL terminated");
             }
-            try {
-                return new String(arr, arrOffset, lengthBytes, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("UTF-8 character encoding not supported", e);
-            }
+            return new String(arr, arrOffset, lengthBytes, StandardCharsets.UTF_8);
         }
     }
 

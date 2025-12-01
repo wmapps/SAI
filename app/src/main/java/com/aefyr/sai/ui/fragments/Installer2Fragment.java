@@ -111,7 +111,7 @@ public class Installer2Fragment extends InstallerFragment implements FilePickerD
             }
         });
         mViewModel.getSessions().observe(getViewLifecycleOwner(), (sessions) -> {
-            setPlaceholderShown(sessions.size() == 0);
+            setPlaceholderShown(sessions.isEmpty());
             sessionsAdapter.setData(sessions);
         });
 
@@ -277,7 +277,7 @@ public class Installer2Fragment extends InstallerFragment implements FilePickerD
 
     @Override
     public void onFilesSelected(String tag, List<File> files) {
-        if (files.size() == 0 || !ensureExtensionsConsistency(files)) {
+        if (files.isEmpty() || !ensureExtensionsConsistency(files)) {
             AlertsUtils.showAlert(this, R.string.error, R.string.installer_error_installer2_mixed_extensions_internal);
             return;
         }

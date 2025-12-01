@@ -22,12 +22,9 @@ import java.util.List;
 public class LocalBackupStorage extends ApksBackupStorage implements LocalBackupStorageProvider.OnConfigChangeListener {
     private static final String TAG = "LocalBackupStorage";
 
-    private LocalBackupStorageProvider mProvider;
+    private final LocalBackupStorageProvider mProvider;
 
-    private Context mContext;
-
-    private HandlerThread mWorkerHandlerThread;
-    private Handler mWorkerHandler;
+    private final Context mContext;
 
     LocalBackupStorage(LocalBackupStorageProvider provider, Context context) {
         super();
@@ -35,9 +32,9 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
         mProvider = provider;
         mContext = context.getApplicationContext();
 
-        mWorkerHandlerThread = new HandlerThread("LocalBackupStorage.Worker");
-        mWorkerHandlerThread.start();
-        mWorkerHandler = new Handler(mWorkerHandlerThread.getLooper());
+        final HandlerThread workerHandlerThread = new HandlerThread("LocalBackupStorage.Worker");
+        workerHandlerThread.start();
+        final Handler mWorkerHandler = new Handler(workerHandlerThread.getLooper());
 
         mProvider.addOnConfigChangeListener(this, mWorkerHandler);
     }
@@ -54,7 +51,10 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
 
     @Override
     protected Uri createFileForTask(SingleBackupTaskConfig config) throws Exception {
-        Uri backupFileUri = LocalBackupUtils.createBackupFile(mContext, getBackupDirUriOrThrow(), config.packageMeta(), !config.exportMode());
+        Uri backupFileUri = LocalBackupUtils.createBackupFile(mContext,
+                                                              getBackupDirUriOrThrow(),
+                                                              config.packageMeta(),
+                                                              !config.exportMode());
         if (backupFileUri == null) {
             throw new Exception("Unable to create backup file");
         }
@@ -76,16 +76,18 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
     protected void deleteFile(Uri uri) {
         uri = deNamespaceUri(uri);
         DocumentFile docFile = SafUtils.docFileFromSingleUriOrFileUri(mContext, uri);
-        if (docFile != null)
+        if (docFile != null) {
             docFile.delete();
+        }
     }
 
     @Override
     protected long getFileSize(Uri uri) {
         uri = deNamespaceUri(uri);
         DocumentFile docFile = SafUtils.docFileFromSingleUriOrFileUri(mContext, uri);
-        if (docFile != null)
+        if (docFile != null) {
             return docFile.length();
+        }
 
         return -1;
     }
@@ -95,20 +97,24 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
         List<Uri> uris = new ArrayList<>();
 
         DocumentFile backupsDir = SafUtils.docFileFromTreeUriOrFileUri(mContext, getBackupDirUriOrThrow());
-        if (backupsDir == null)
+        if (backupsDir == null) {
             return uris;
+        }
 
         for (DocumentFile docFile : backupsDir.listFiles()) {
-            if (docFile.isDirectory())
+            if (docFile.isDirectory()) {
                 continue;
+            }
 
             String docName = docFile.getName();
-            if (docName == null)
+            if (docName == null) {
                 continue;
+            }
 
             String docExt = Utils.getExtension(docName);
-            if (docExt == null || !docExt.toLowerCase().equals("apks"))
+            if (!"apks".equalsIgnoreCase(docExt)) {
                 continue;
+            }
 
             uris.add(namespaceUri(docFile.getUri()));
         }
@@ -120,8 +126,9 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
     public String getBackupFileHash(Uri uri) {
         uri = deNamespaceUri(uri);
         DocumentFile docFile = SafUtils.docFileFromSingleUriOrFileUri(mContext, uri);
-        if (docFile == null)
+        if (docFile == null) {
             throw new RuntimeException("wtf, doc file is null for uri " + uri);
+        }
 
         //Low budget hash
         return docFile.lastModified() + "/" + docFile.length();
@@ -136,8 +143,9 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
     public void deleteBackup(Uri backupUri) {
         backupUri = deNamespaceUri(backupUri);
         DocumentFile docFile = SafUtils.docFileFromSingleUriOrFileUri(mContext, backupUri);
-        if (docFile == null)
+        if (docFile == null) {
             return;
+        }
 
         if (!docFile.exists()) {
             notifyBackupRemoved(namespaceUri(backupUri));
@@ -154,8 +162,9 @@ public class LocalBackupStorage extends ApksBackupStorage implements LocalBackup
     }
 
     private Uri deNamespaceUri(Uri namespacedUri) {
-        if (!getStorageId().equals(namespacedUri.getAuthority()))
+        if (!getStorageId().equals(namespacedUri.getAuthority())) {
             throw new IllegalArgumentException("Passed uri doesn't belong to this storage");
+        }
 
         return Uri.parse(namespacedUri.getQueryParameter("uri"));
     }

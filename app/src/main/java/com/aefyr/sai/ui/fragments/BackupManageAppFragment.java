@@ -26,7 +26,7 @@ import com.aefyr.sai.ui.dialogs.BackupDialogFragment;
 import com.aefyr.sai.ui.dialogs.DeleteBackupConfirmationDialog;
 import com.aefyr.sai.ui.dialogs.RestoreBackupDialogFragment;
 import com.aefyr.sai.utils.Utils;
-import com.aefyr.sai.view.coolbar.Coolbar;
+import com.aefyr.sai.view.coolbar.CoolBar;
 import com.aefyr.sai.viewmodels.BackupManageAppViewModel;
 import com.aefyr.sai.viewmodels.factory.BackupManageAppViewModelFactory;
 
@@ -52,14 +52,15 @@ public class BackupManageAppFragment extends SaiBaseFragment implements BackupAp
         super.onCreate(savedInstanceState);
 
         String pkg = requireArguments().getString(EXTRA_PKG);
-        mViewModel = new ViewModelProvider(this, new BackupManageAppViewModelFactory(requireContext(), pkg)).get(BackupManageAppViewModel.class);
+        mViewModel = new ViewModelProvider(this, new BackupManageAppViewModelFactory(requireContext(), pkg)).get(
+                BackupManageAppViewModel.class);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Coolbar coolbar = findViewById(R.id.coolbar_backup_manage_app);
+        CoolBar coolbar = findViewById(R.id.coolbar_backup_manage_app);
         findViewById(R.id.ib_close).setOnClickListener(v -> dismiss());
 
         ImageButton moreOptionsButton = findViewById(R.id.ib_app_details_menu);
@@ -68,7 +69,10 @@ public class BackupManageAppFragment extends SaiBaseFragment implements BackupAp
         RecyclerView recycler = findViewById(R.id.rv_backup_app_details);
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        BackupAppDetailsAdapter detailsAdapter = new BackupAppDetailsAdapter(requireContext(), new Selection<>(new SimpleKeyStorage()), this, this);
+        BackupAppDetailsAdapter detailsAdapter = new BackupAppDetailsAdapter(requireContext(),
+                                                                             new Selection<>(new SimpleKeyStorage()),
+                                                                             this,
+                                                                             this);
         recycler.setAdapter(detailsAdapter);
 
         mViewModel.getDetails().observe(getViewLifecycleOwner(), details -> {
@@ -109,7 +113,8 @@ public class BackupManageAppFragment extends SaiBaseFragment implements BackupAp
 
     private void openAppInSystemSettings() {
         try {
-            Intent settingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, new Uri.Builder().scheme("package").opaquePart(mViewModel.getPackage()).build());
+            Intent settingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                               new Uri.Builder().scheme("package").opaquePart(mViewModel.getPackage()).build());
             startActivity(settingsIntent);
         } catch (Exception e) {
             Log.w(TAG, "Unable to open app in system settings", e);
@@ -137,10 +142,12 @@ public class BackupManageAppFragment extends SaiBaseFragment implements BackupAp
     @Override
     public void installApp(BackupApp backupApp) {
         Backup latestBackup = mViewModel.getLatestBackup();
-        if (latestBackup == null)
+        if (latestBackup == null) {
             return;
+        }
 
-        RestoreBackupDialogFragment.newInstance(latestBackup.uri(), latestBackup.creationTime()).show(getChildFragmentManager(), null);
+        RestoreBackupDialogFragment.newInstance(latestBackup.uri(), latestBackup.creationTime())
+                                   .show(getChildFragmentManager(), null);
     }
 
     @Override
@@ -150,13 +157,15 @@ public class BackupManageAppFragment extends SaiBaseFragment implements BackupAp
 
     @Override
     public void deleteBackup(Backup backup) {
-        DeleteBackupConfirmationDialog.newInstance(backup.storageId(), backup.uri(), backup.creationTime()).show(getChildFragmentManager(), null);
+        DeleteBackupConfirmationDialog.newInstance(backup.storageId(), backup.uri(), backup.creationTime())
+                                      .show(getChildFragmentManager(), null);
     }
 
     private void dismiss() {
         DismissDelegate dismissDelegate = Utils.getParentAs(this, DismissDelegate.class);
-        if (dismissDelegate == null)
+        if (dismissDelegate == null) {
             throw new RuntimeException("Host of BackupManageAppFragment must implement BackupManageAppFragment.DismissDelegate");
+        }
 
         dismissDelegate.dismiss(this);
     }

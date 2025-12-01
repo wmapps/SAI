@@ -74,7 +74,7 @@ public class PackageMeta implements Parcelable {
     }
 
     public static class Builder {
-        private PackageMeta mPackageMeta;
+        private final PackageMeta mPackageMeta;
 
         public Builder(String packageName) {
             mPackageMeta = new PackageMeta(packageName, "?");
@@ -153,7 +153,9 @@ public class PackageMeta implements Parcelable {
                     .setLabel(applicationInfo.loadLabel(pm).toString())
                     .setHasSplits(applicationInfo.splitPublicSourceDirs != null && applicationInfo.splitPublicSourceDirs.length > 0)
                     .setIsSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                    .setVersionCode(Utils.apiIsAtLeast(Build.VERSION_CODES.P) ? packageInfo.getLongVersionCode() : packageInfo.versionCode)
+                    .setVersionCode(Utils.apiIsAtLeast(Build.VERSION_CODES.P) ?
+                                    packageInfo.getLongVersionCode() :
+                                    packageInfo.versionCode)
                     .setVersionName(packageInfo.versionName)
                     .setIcon(applicationInfo.icon)
                     .setInstallTime(packageInfo.firstInstallTime)

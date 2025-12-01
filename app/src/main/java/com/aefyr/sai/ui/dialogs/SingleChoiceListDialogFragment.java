@@ -69,8 +69,9 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
+        }
 
         mParams = Objects.requireNonNull(args.getParcelable(ARG_PARAMS), "params must not be null");
         mParams.setTag(getTag());
@@ -78,7 +79,8 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
 
     @Nullable
     @Override
-    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View onCreateContentView(LayoutInflater inflater, @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
         RecyclerView recyclerView = new RecyclerView(requireContext());
         recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
         return recyclerView;
@@ -103,17 +105,20 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
     protected void deliverSelectionResult(String tag, int selectedItemIndex) {
         try {
             OnItemSelectedListener listener;
-            if (getParentFragment() != null)
+            if (getParentFragment() != null) {
                 listener = (OnItemSelectedListener) getParentFragment();
-            else
+            } else {
                 listener = (OnItemSelectedListener) getActivity();
+            }
 
-            if (listener != null)
+            if (listener != null) {
                 listener.onItemSelected(tag, selectedItemIndex);
+            }
 
             dismiss();
         } catch (Exception e) {
-            throw new IllegalStateException("Activity/Fragment that uses SingleChoiceListDialogFragment must implement SingleChoiceListDialogFragment.OnItemSelectedListener");
+            throw new IllegalStateException(
+                    "Activity/Fragment that uses SingleChoiceListDialogFragment must implement SingleChoiceListDialogFragment.OnItemSelectedListener");
         }
     }
 
@@ -158,9 +163,10 @@ public class SingleChoiceListDialogFragment extends BaseBottomSheetDialogFragmen
                 mText = itemView.findViewById(R.id.tv_single_choice_item);
 
                 itemView.setOnClickListener((v) -> {
-                    int adapterPosition = getAdapterPosition();
-                    if (adapterPosition == RecyclerView.NO_POSITION)
+                    int adapterPosition = getBindingAdapterPosition();
+                    if (adapterPosition == RecyclerView.NO_POSITION) {
                         return;
+                    }
 
                     deliverSelectionResult(mParams.tag, adapterPosition);
                 });

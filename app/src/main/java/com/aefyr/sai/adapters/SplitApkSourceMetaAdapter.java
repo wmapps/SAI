@@ -25,23 +25,21 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitApkSourceMetaAdapter.BaseViewHolder> {
+public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitApkSourceMetaAdapter.BaseViewHolder<?>> {
 
     public static final int VH_TYPE_HEADER = 0;
     public static final int VH_TYPE_NOTICE = 1;
     public static final int VH_TYPE_CATEGORY = 2;
     public static final int VH_TYPE_SPLIT_PART = 3;
 
-    private Context mContext;
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
 
     private SplitApkSourceMeta mMeta;
     private List<Object> mFlattenedData;
 
     public SplitApkSourceMetaAdapter(Selection<String> partsSelection, LifecycleOwner lifecycleOwner, Context context) {
         super(partsSelection, lifecycleOwner);
-        mContext = context;
-        mInflater = LayoutInflater.from(mContext);
+        mInflater = LayoutInflater.from(context);
     }
 
     public void setMeta(SplitApkSourceMeta meta) {
@@ -60,25 +58,28 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0)
+        if (position == 0) {
             return VH_TYPE_HEADER;
+        }
 
         Object object = getItemForAdapterPosition(position);
 
-        if (object instanceof Notice)
+        if (object instanceof Notice) {
             return VH_TYPE_NOTICE;
+        }
 
-        if (object instanceof SplitCategory)
+        if (object instanceof SplitCategory) {
             return VH_TYPE_CATEGORY;
-        else if (object instanceof SplitPart)
+        } else if (object instanceof SplitPart) {
             return VH_TYPE_SPLIT_PART;
+        }
 
         throw new IllegalStateException("Unexpected object class in data - " + object.getClass().getCanonicalName());
     }
 
     @NonNull
     @Override
-    public SplitApkSourceMetaAdapter.BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SplitApkSourceMetaAdapter.BaseViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case VH_TYPE_HEADER:
                 return new HeaderViewHolder(mInflater.inflate(R.layout.item_installerx_header, parent, false));
@@ -95,23 +96,28 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
 
     @Override
     protected String getKeyForPosition(int position) {
-        if (position == 0)
+        if (position == 0) {
             return "SplitApkSourceMetaAdapter.header";
+        }
 
         Object object = getItemForAdapterPosition(position);
 
-        if (object instanceof Notice)
+        if (object instanceof Notice) {
             return "SplitApkSourceMetaAdapter.notice." + object.hashCode();
+        }
 
-        if (object instanceof SplitCategory)
+        if (object instanceof SplitCategory) {
             return ((SplitCategory) object).id();
+        }
 
-        if (object instanceof SplitPart)
+        if (object instanceof SplitPart) {
             return ((SplitPart) object).localPath();
+        }
 
         throw new IllegalStateException("Unexpected object class in data - " + object.getClass().getCanonicalName());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onBindViewHolder(@NonNull SplitApkSourceMetaAdapter.BaseViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
@@ -149,11 +155,12 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
         holder.recycle();
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getItemForAdapterPosition(int adapterPosition) {
         return (T) mFlattenedData.get(adapterPosition - 1);
     }
 
-    protected abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
+    public abstract static class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
         public BaseViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -164,11 +171,11 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
         abstract void recycle();
     }
 
-    protected class HeaderViewHolder extends BaseViewHolder<SplitApkSourceMeta> {
+    protected static class HeaderViewHolder extends BaseViewHolder<SplitApkSourceMeta> {
 
-        private ImageView mAppIcon;
-        private TextView mAppTitle;
-        private TextView mAppVersion;
+        private final ImageView mAppIcon;
+        private final TextView mAppTitle;
+        private final TextView mAppVersion;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -189,9 +196,9 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
             }
 
             Glide.with(mAppIcon)
-                    .load(appMeta.iconUri != null ? appMeta.iconUri : R.drawable.placeholder_app_icon)
-                    .placeholder(R.drawable.placeholder_app_icon)
-                    .into(mAppIcon);
+                 .load(appMeta.iconUri != null ? appMeta.iconUri : R.drawable.placeholder_app_icon)
+                 .placeholder(R.drawable.placeholder_app_icon)
+                 .into(mAppIcon);
 
             mAppTitle.setText(appMeta.appName != null ? appMeta.appName : appMeta.packageName);
 
@@ -201,14 +208,13 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
 
         @Override
         void recycle() {
-            Glide.with(mAppIcon)
-                    .clear(mAppIcon);
+            Glide.with(mAppIcon).clear(mAppIcon);
         }
     }
 
-    protected class NoticeViewHolder extends BaseViewHolder<Notice> {
+    protected static class NoticeViewHolder extends BaseViewHolder<Notice> {
 
-        private TextView mNoticeText;
+        private final TextView mNoticeText;
 
         private NoticeViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -227,10 +233,10 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
         }
     }
 
-    protected class SplitCategoryViewHolder extends BaseViewHolder<SplitCategory> {
+    protected static class SplitCategoryViewHolder extends BaseViewHolder<SplitCategory> {
 
-        private TextView mTitle;
-        private TextView mDesc;
+        private final TextView mTitle;
+        private final TextView mDesc;
 
         private SplitCategoryViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -255,10 +261,10 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
 
     protected class SplitPartViewHolder extends BaseViewHolder<SplitPart> {
 
-        private TextView mName;
-        private TextView mDescription;
+        private final TextView mName;
+        private final TextView mDescription;
 
-        private CheckBox mCheck;
+        private final CheckBox mCheck;
 
         private SplitPartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -269,13 +275,15 @@ public class SplitApkSourceMetaAdapter extends SelectableAdapter<String, SplitAp
             mCheck = itemView.findViewById(R.id.check_split_apk_part);
 
             itemView.setOnClickListener((v) -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
                 SplitPart item = getItemForAdapterPosition(adapterPosition);
-                if (item.isRequired())
+                if (item.isRequired()) {
                     return;
+                }
 
                 boolean selected = switchSelection(item.localPath());
                 mCheck.setChecked(selected);

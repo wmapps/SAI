@@ -29,14 +29,14 @@ public class LocalBackupStorageProvider implements BackupStorageProvider, Shared
 
     private static LocalBackupStorageProvider sInstance;
 
-    private Context mContext;
-    private SharedPreferences mPrefs;
-    private LocalBackupStorage mStorage;
+    private final Context mContext;
+    private final SharedPreferences mPrefs;
+    private final LocalBackupStorage mStorage;
 
-    private AtomicBoolean mIsSetup = new AtomicBoolean(false);
-    private MutableLiveData<Boolean> mIsSetupLiveData = new MutableLiveData<>(false);
+    private final AtomicBoolean mIsSetup = new AtomicBoolean(false);
+    private final MutableLiveData<Boolean> mIsSetupLiveData = new MutableLiveData<>(false);
 
-    private Map<OnConfigChangeListener, OnConfigChangeListenerHandlerWrapper> mConfigChangeListeners = new ConcurrentHashMap<>();
+    private final Map<OnConfigChangeListener, OnConfigChangeListenerHandlerWrapper> mConfigChangeListeners = new ConcurrentHashMap<>();
 
     public static synchronized LocalBackupStorageProvider getInstance(Context context) {
         return sInstance != null ? sInstance : new LocalBackupStorageProvider(context);
@@ -97,8 +97,9 @@ public class LocalBackupStorageProvider implements BackupStorageProvider, Shared
     @Nullable
     public Uri getBackupDirUri() {
         String rawUri = mPrefs.getString(LocalBackupStoragePrefConstants.KEY_BACKUP_DIR_URI, null);
-        if (rawUri == null)
+        if (rawUri == null) {
             return null;
+        }
 
         return Uri.parse(rawUri);
     }
@@ -108,7 +109,8 @@ public class LocalBackupStorageProvider implements BackupStorageProvider, Shared
     }
 
     public String getBackupNameFormat() {
-        return mPrefs.getString(LocalBackupStoragePrefConstants.KEY_BACKUP_FILE_NAME_FORMAT, LocalBackupStoragePrefConstants.DEFAULT_VALUE_BACKUP_FILE_NAME_FORMAT);
+        return mPrefs.getString(LocalBackupStoragePrefConstants.KEY_BACKUP_FILE_NAME_FORMAT,
+                                LocalBackupStoragePrefConstants.DEFAULT_VALUE_BACKUP_FILE_NAME_FORMAT);
     }
 
     public void setBackupNameFormat(String format) {
@@ -129,8 +131,9 @@ public class LocalBackupStorageProvider implements BackupStorageProvider, Shared
     }
 
     private void notifyBackupDirChanged() {
-        for (OnConfigChangeListener listener : mConfigChangeListeners.values())
+        for (OnConfigChangeListener listener : mConfigChangeListeners.values()) {
             listener.onBackupDirChanged();
+        }
     }
 
     private void invalidateIsSetup() {
@@ -154,8 +157,8 @@ public class LocalBackupStorageProvider implements BackupStorageProvider, Shared
 
     private static class OnConfigChangeListenerHandlerWrapper implements OnConfigChangeListener {
 
-        private OnConfigChangeListener mListener;
-        private Handler mHandler;
+        private final OnConfigChangeListener mListener;
+        private final Handler mHandler;
 
 
         private OnConfigChangeListenerHandlerWrapper(OnConfigChangeListener listener, Handler handler) {

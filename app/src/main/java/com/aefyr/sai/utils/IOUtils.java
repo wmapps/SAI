@@ -32,13 +32,15 @@ public class IOUtils {
     }
 
     public static void copyFile(File original, File destination) throws IOException {
-        try (FileInputStream inputStream = new FileInputStream(original); FileOutputStream outputStream = new FileOutputStream(destination)) {
+        try (FileInputStream inputStream = new FileInputStream(original);
+             FileOutputStream outputStream = new FileOutputStream(destination)) {
             copyStream(inputStream, outputStream);
         }
     }
 
     public static void copyFileFromAssets(Context context, String assetFileName, File destination) throws IOException {
-        try (InputStream inputStream = context.getAssets().open(assetFileName); FileOutputStream outputStream = new FileOutputStream(destination)) {
+        try (InputStream inputStream = context.getAssets().open(assetFileName);
+             FileOutputStream outputStream = new FileOutputStream(destination)) {
             copyStream(inputStream, outputStream);
         }
     }
@@ -47,8 +49,9 @@ public class IOUtils {
         if (f.isDirectory()) {
             File[] files = f.listFiles();
             if (files != null) {
-                for (File child : files)
+                for (File child : files) {
                     deleteRecursively(child);
+                }
             }
         }
         f.delete();
@@ -68,8 +71,9 @@ public class IOUtils {
             byte[] buffer = new byte[1024 * 1024];
             int read;
 
-            while ((read = in.read(buffer)) > 0)
+            while ((read = in.read(buffer)) > 0) {
                 crc32.update(buffer, 0, read);
+            }
 
             return crc32.getValue();
         }
@@ -81,8 +85,9 @@ public class IOUtils {
                 char[] buf = new char[1024];
                 int len;
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                while ((len = reader.read(buf)) > 0)
+                while ((len = reader.read(buf)) > 0) {
                     builder.append(buf, 0, len);
+                }
 
                 reader.close();
             } catch (Exception e) {
@@ -96,9 +101,9 @@ public class IOUtils {
     /**
      * Read contents of input stream to a byte array and close it
      *
-     * @param inputStream
+     * @param inputStream the input stream
      * @return contents of input stream
-     * @throws IOException
+     * @throws IOException the io exception
      */
     public static byte[] readStream(InputStream inputStream) throws IOException {
         try (InputStream in = inputStream) {
@@ -113,9 +118,9 @@ public class IOUtils {
     /**
      * Read contents of input stream to a byte array, but don't close the stream
      *
-     * @param inputStream
+     * @param inputStream the input stream
      * @return contents of input stream
-     * @throws IOException
+     * @throws IOException the io exception
      */
     public static byte[] readStreamNoClose(InputStream inputStream) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -124,8 +129,9 @@ public class IOUtils {
     }
 
     public static void closeSilently(Closeable closeable) {
-        if (closeable == null)
+        if (closeable == null) {
             return;
+        }
 
         try {
             closeable.close();
@@ -137,13 +143,13 @@ public class IOUtils {
     /**
      * Hashes stream content using passed {@link MessageDigest}, closes the stream and returns digest bytes
      *
-     * @param inputStream
-     * @param messageDigest
-     * @return
-     * @throws IOException
+     * @param inputStream   the input stream
+     * @param messageDigest the message digest
+     * @return the byte [ ]
+     * @throws IOException the io exception
      */
     public static byte[] hashStream(InputStream inputStream, MessageDigest messageDigest) throws IOException {
-        try (DigestInputStream digestInputStream = new DigestInputStream(inputStream, messageDigest);) {
+        try (DigestInputStream digestInputStream = new DigestInputStream(inputStream, messageDigest)) {
             byte[] buffer = new byte[1024 * 64];
             int read;
             while ((read = digestInputStream.read(buffer)) > 0) {

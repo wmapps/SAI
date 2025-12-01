@@ -82,8 +82,9 @@ public class BackupEntity {
         backupEntity.contentHash = backup.contentHash();
         backupEntity.storageId = backup.storageId();
 
-        if (backup.isSplitApk())
+        if (backup.isSplitApk()) {
             backupEntity.addFlag(FLAG_SPLIT_APK);
+        }
 
         return backupEntity;
     }

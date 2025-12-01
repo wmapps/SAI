@@ -48,13 +48,12 @@ public class LocalBackupStorageSetupFragment extends SaiBaseFragment implements 
 
     @Override
     public void onDirectoryPicked(@Nullable String tag, Uri dirUri) {
-        if (tag == null)
+        if (tag == null) {
             return;
+        }
 
-        switch (tag) {
-            case "backup_dir":
-                mViewModel.setBackupDir(dirUri);
-                break;
+        if ("backup_dir".equals(tag)) {
+            mViewModel.setBackupDir(dirUri);
         }
     }
 }

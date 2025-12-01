@@ -39,29 +39,30 @@ import java.util.List;
 public class BackupViewModel extends AndroidViewModel {
     private static final String TAG = "BackupVM";
 
-    private SharedPreferences mFilterPrefs;
+    private final SharedPreferences mFilterPrefs;
 
-    private BackupManager mBackupManager;
-    private Observer<List<BackupApp>> mBackupRepoPackagesObserver;
+    private final BackupManager mBackupManager;
+    private final Observer<List<BackupApp>> mBackupRepoPackagesObserver;
 
     private ComplexFilterConfig mComplexFilterConfig;
     private final BackupCustomFilterFactory mFilterFactory = new BackupCustomFilterFactory();
 
     private String mCurrentSearchQuery = "";
 
-    private MutableLiveData<List<BackupApp>> mPackagesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<BackupApp>> mPackagesLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<BackupPackagesFilterConfig> mBackupFilterConfig = new MutableLiveData<>();
+    private final MutableLiveData<BackupPackagesFilterConfig> mBackupFilterConfig = new MutableLiveData<>();
 
     private final SimpleKeyStorage<String> mKeyStorage = new SimpleKeyStorage<>();
     private final Selection<String> mSelection = new Selection<>(mKeyStorage);
 
-    private LiveFilterApplier<BackupApp> mLiveFilterApplier = new LiveFilterApplier<>();
+    private final LiveFilterApplier<BackupApp> mLiveFilterApplier = new LiveFilterApplier<>();
     private final Observer<List<BackupApp>> mLiveFilterObserver = (apps) -> {
         mPackagesLiveData.setValue(apps);
 
-        if (mSelection.hasSelection())
+        if (mSelection.hasSelection()) {
             reviseSelection(apps);
+        }
     };
 
 
@@ -117,8 +118,9 @@ public class BackupViewModel extends AndroidViewModel {
 
     public void selectAllApps() {
         List<BackupApp> packages = getPackages().getValue();
-        if (packages == null)
+        if (packages == null) {
             return;
+        }
 
         Collection<String> keys = new ArrayList<>(packages.size());
         for (BackupApp pkg : packages) {
@@ -145,14 +147,16 @@ public class BackupViewModel extends AndroidViewModel {
 
         HashSet<String> newPackageListPackages = new HashSet<>();
         for (BackupApp app : newPackagesList) {
-            if (app.isInstalled())
+            if (app.isInstalled()) {
                 newPackageListPackages.add(app.packageMeta().packageName);
+            }
         }
 
         ArrayList<String> packagesToDeselect = new ArrayList<>();
         for (String selectedPackage : mSelection.getSelectedKeys()) {
-            if (!newPackageListPackages.contains(selectedPackage))
+            if (!newPackageListPackages.contains(selectedPackage)) {
                 packagesToDeselect.add(selectedPackage);
+            }
         }
 
         mSelection.batchSetSelected(packagesToDeselect, false);
@@ -176,7 +180,7 @@ public class BackupViewModel extends AndroidViewModel {
 
     private static class SearchFilter implements CustomFilter<BackupApp> {
 
-        private String mQuery;
+        private final String mQuery;
 
         SearchFilter(String query) {
             mQuery = query;
@@ -186,8 +190,9 @@ public class BackupViewModel extends AndroidViewModel {
         public boolean filterSimple(BackupApp app) {
             String query = mQuery.toLowerCase();
 
-            if (query.length() == 0)
+            if (query.isEmpty()) {
                 return false;
+            }
 
             //Check if app label matches
             String[] wordsInLabel = app.packageMeta().label.toLowerCase().split(" ");
@@ -230,13 +235,24 @@ public class BackupViewModel extends AndroidViewModel {
                     SortFilterConfigOption selectedOption = config.getSelectedOption();
                     switch (selectedOption.id()) {
                         case BackupPackagesFilterConfig.SORT_NAME:
-                            Collections.sort(list, (o1, o2) -> (selectedOption.ascending() ? 1 : -1) * o1.packageMeta().label.compareToIgnoreCase(o2.packageMeta().label));
+                            Collections.sort(list,
+                                             (o1, o2) -> (selectedOption.ascending() ?
+                                                          1 :
+                                                          -1) * o1.packageMeta().label.compareToIgnoreCase(o2.packageMeta().label));
                             break;
                         case BackupPackagesFilterConfig.SORT_INSTALL:
-                            Collections.sort(list, (o1, o2) -> (selectedOption.ascending() ? 1 : -1) * Long.compare(o1.packageMeta().installTime, o2.packageMeta().installTime));
+                            Collections.sort(list,
+                                             (o1, o2) -> (selectedOption.ascending() ?
+                                                          1 :
+                                                          -1) * Long.compare(o1.packageMeta().installTime,
+                                                                             o2.packageMeta().installTime));
                             break;
                         case BackupPackagesFilterConfig.SORT_UPDATE:
-                            Collections.sort(list, (o1, o2) -> (selectedOption.ascending() ? 1 : -1) * Long.compare(o1.packageMeta().updateTime, o2.packageMeta().updateTime));
+                            Collections.sort(list,
+                                             (o1, o2) -> (selectedOption.ascending() ?
+                                                          1 :
+                                                          -1) * Long.compare(o1.packageMeta().updateTime,
+                                                                             o2.packageMeta().updateTime));
                             break;
                     }
 

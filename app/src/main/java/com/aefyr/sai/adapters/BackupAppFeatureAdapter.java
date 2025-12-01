@@ -18,12 +18,11 @@ public class BackupAppFeatureAdapter extends RecyclerView.Adapter<BackupAppFeatu
 
     private List<AppFeature> mFeatures;
 
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
 
     public BackupAppFeatureAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
     }
-
 
     public void setFeatures(List<AppFeature> features) {
         mFeatures = features;
@@ -46,9 +45,9 @@ public class BackupAppFeatureAdapter extends RecyclerView.Adapter<BackupAppFeatu
         return mFeatures == null ? 0 : mFeatures.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private Chip mChip;
+        private final Chip mChip;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

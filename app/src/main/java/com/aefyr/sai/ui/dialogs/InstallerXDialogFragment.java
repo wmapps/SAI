@@ -288,7 +288,7 @@ public class InstallerXDialogFragment extends BaseBottomSheetDialogFragment impl
 
     @Override
     public void onDialogDismissed(@NonNull String dialogTag) {
-        if (dialogTag.equals(DIALOG_TAG_Q_SAF_WARNING)) {
+        if (DIALOG_TAG_Q_SAF_WARNING.equals(dialogTag)) {
             mActionAfterGettingStoragePermissions = PICK_WITH_SAF;
             if (PermissionsUtils.checkAndRequestStoragePermissions(this)) {
                 pickFilesWithSaf(false);

@@ -9,8 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class MapBackedLocker<T> implements Locker<T> {
 
     public static <T> MapBackedLocker<T> create() {
-        if (Utils.apiIsAtLeast(Build.VERSION_CODES.N))
+        if (Utils.apiIsAtLeast(Build.VERSION_CODES.N)) {
             return new ConcurrentHashMapLocker<>();
+        }
 
         return new HashMapLocker<>();
     }

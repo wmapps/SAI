@@ -3,11 +3,13 @@ package com.aefyr.sai.utils;
 public class MathUtils {
 
     public static int clamp(int a, int min, int max) {
-        if (a < min)
+        if (a < min) {
             return min;
+        }
 
-        if (a > max)
+        if (a > max) {
             return max;
+        }
 
         return a;
     }
@@ -16,8 +18,9 @@ public class MathUtils {
         int distanceToA = Math.abs(x - a);
         int distanceToB = Math.abs(x - b);
 
-        if (distanceToA > distanceToB)
+        if (distanceToA > distanceToB) {
             return b;
+        }
 
         return a;
     }

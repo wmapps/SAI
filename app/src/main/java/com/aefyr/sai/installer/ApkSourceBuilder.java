@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class ApkSourceBuilder {
 
-    private Context mContext;
+    private final Context mContext;
 
     private boolean mSourceSet;
     private List<File> mApkFiles;
@@ -93,55 +93,62 @@ public class ApkSourceBuilder {
 
         if (mApkFiles != null) {
             List<FileDescriptor> apkFileDescriptors = new ArrayList<>(mApkFiles.size());
-            for (File apkFile : mApkFiles)
+            for (File apkFile : mApkFiles) {
                 apkFileDescriptors.add(new NormalFileDescriptor(apkFile));
+            }
 
             apkSource = new DefaultApkSource(apkFileDescriptors);
         } else if (mZipFile != null) {
             ZipBackedApkSource zipBackedApkSource;
-            if (mReadZipViaZipFileEnabled)
+            if (mReadZipViaZipFileEnabled) {
                 zipBackedApkSource = new ZipFileApkSource(mContext, new NormalFileDescriptor(mZipFile));
-            else
+            } else {
                 zipBackedApkSource = new ZipApkSource(mContext, new NormalFileDescriptor(mZipFile));
+            }
 
             apkSource = zipBackedApkSource;
             sourceIsZip = true;
         } else if (mZipUri != null) {
             ZipBackedApkSource zipBackedApkSource;
-            if (mReadZipViaZipFileEnabled)
+            if (mReadZipViaZipFileEnabled) {
                 zipBackedApkSource = new ZipFileApkSource(mContext, new ContentUriFileDescriptor(mContext, mZipUri));
-            else
+            } else {
                 zipBackedApkSource = new ZipApkSource(mContext, new ContentUriFileDescriptor(mContext, mZipUri));
+            }
 
             apkSource = zipBackedApkSource;
             sourceIsZip = true;
         } else if (mApkUris != null) {
             List<FileDescriptor> apkUriDescriptors = new ArrayList<>(mApkUris.size());
-            for (Uri apkUri : mApkUris)
+            for (Uri apkUri : mApkUris) {
                 apkUriDescriptors.add(new ContentUriFileDescriptor(mContext, apkUri));
+            }
 
             apkSource = new DefaultApkSource(apkUriDescriptors);
         } else {
             throw new IllegalStateException("No source set");
         }
 
-        if (mSigningEnabled)
+        if (mSigningEnabled) {
             apkSource = new SignerApkSource(mContext, apkSource);
+        }
 
         //Signing already uses temp files, so there's not reason to use CopyToFileApkSource with it
         if (mZipExtractionEnabled && sourceIsZip && !mSigningEnabled) {
             apkSource = new CopyToFileApkSource(mContext, apkSource);
         }
 
-        if (mFilteredApks != null)
+        if (mFilteredApks != null) {
             apkSource = new FilterApkSource(apkSource, mFilteredApks, mBlacklist);
+        }
 
         return apkSource;
     }
 
     private void ensureSourceSetOnce() {
-        if (mSourceSet)
+        if (mSourceSet) {
             throw new IllegalStateException("Source can be only be set once");
+        }
         mSourceSet = true;
     }
 }

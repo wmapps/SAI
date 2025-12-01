@@ -5,15 +5,20 @@ import androidx.annotation.DrawableRes;
 import com.aefyr.sai.R;
 
 public enum BackupStatus {
-    NO_BACKUP, SAME_VERSION, HIGHER_VERSION, LOWER_VERSION, APP_NOT_INSTALLED;
+    NO_BACKUP,
+    SAME_VERSION,
+    HIGHER_VERSION,
+    LOWER_VERSION,
+    APP_NOT_INSTALLED;
 
     public static BackupStatus fromInstalledAppAndBackupVersions(long installedAppVersion, long backupVersion) {
-        if (backupVersion == installedAppVersion)
+        if (backupVersion == installedAppVersion) {
             return BackupStatus.SAME_VERSION;
-        else if (backupVersion > installedAppVersion)
+        } else if (backupVersion > installedAppVersion) {
             return BackupStatus.HIGHER_VERSION;
-        else
+        } else {
             return BackupStatus.LOWER_VERSION;
+        }
     }
 
     @DrawableRes

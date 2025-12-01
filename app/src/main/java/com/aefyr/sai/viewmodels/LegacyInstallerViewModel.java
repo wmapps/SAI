@@ -26,16 +26,17 @@ public class LegacyInstallerViewModel extends AndroidViewModel implements SAIPac
     public static final String EVENT_INSTALLATION_FAILED = "installation_failed";
 
     private SAIPackageInstaller mInstaller;
-    private Context mContext;
-    private PreferencesHelper mPrefsHelper;
+    private final Context mContext;
+    private final PreferencesHelper mPrefsHelper;
     private long mOngoingSessionId;
 
     public enum InstallerState {
-        IDLE, INSTALLING
+        IDLE,
+        INSTALLING
     }
 
-    private MutableLiveData<InstallerState> mState = new MutableLiveData<>();
-    private MutableLiveData<Event<String[]>> mEvents = new MutableLiveData<>();
+    private final MutableLiveData<InstallerState> mState = new MutableLiveData<>();
+    private final MutableLiveData<Event<String[]>> mEvents = new MutableLiveData<>();
 
     public LegacyInstallerViewModel(@NonNull Application application) {
         super(application);
@@ -105,8 +106,9 @@ public class LegacyInstallerViewModel extends AndroidViewModel implements SAIPac
     private void ensureInstallerActuality() {
         SAIPackageInstaller actualInstaller = PackageInstallerProvider.getInstaller(mContext);
         if (actualInstaller != mInstaller) {
-            if (mInstaller != null)
+            if (mInstaller != null) {
                 mInstaller.removeStatusListener(this);
+            }
 
             mInstaller = actualInstaller;
             mInstaller.addStatusListener(this);
@@ -121,9 +123,11 @@ public class LegacyInstallerViewModel extends AndroidViewModel implements SAIPac
     }
 
     @Override
-    public void onStatusChanged(long installationID, SAIPackageInstaller.InstallationStatus status, @Nullable String packageNameOrErrorDescription) {
-        if (installationID != mOngoingSessionId)
+    public void onStatusChanged(long installationID, SAIPackageInstaller.InstallationStatus status,
+                                @Nullable String packageNameOrErrorDescription) {
+        if (installationID != mOngoingSessionId) {
             return;
+        }
 
         switch (status) {
             case QUEUED:

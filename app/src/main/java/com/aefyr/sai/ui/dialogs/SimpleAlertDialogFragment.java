@@ -13,8 +13,6 @@ import androidx.fragment.app.DialogFragment;
 
 import com.aefyr.sai.R;
 
-import java.util.Objects;
-
 public class SimpleAlertDialogFragment extends DialogFragment {
     private static final String ARG_TITLE = "title";
     private static final String ARG_MESSAGE = "message";
@@ -40,8 +38,9 @@ public class SimpleAlertDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
+        }
 
         mTitle = args.getCharSequence(ARG_TITLE, "title");
         mMessage = args.getCharSequence(ARG_MESSAGE, "message");
@@ -50,7 +49,10 @@ public class SimpleAlertDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new AlertDialog.Builder(Objects.requireNonNull(getContext())).setTitle(mTitle).setMessage(mMessage).setPositiveButton(R.string.ok, null).create();
+        return new AlertDialog.Builder(requireContext()).setTitle(mTitle)
+                                                        .setMessage(mMessage)
+                                                        .setPositiveButton(R.string.ok, null)
+                                                        .create();
     }
 
     @Override
@@ -58,11 +60,13 @@ public class SimpleAlertDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
 
         Object parent = getParentFragment();
-        if (parent == null)
+        if (parent == null) {
             parent = requireActivity();
+        }
 
-        if (parent instanceof OnDismissListener && getTag() != null)
+        if (parent instanceof OnDismissListener && getTag() != null) {
             ((OnDismissListener) parent).onDialogDismissed(getTag());
+        }
 
     }
 

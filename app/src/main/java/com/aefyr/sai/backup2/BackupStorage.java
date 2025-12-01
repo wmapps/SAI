@@ -21,23 +21,26 @@ public interface BackupStorage {
     /**
      * List backup files in this storage
      *
-     * @return
+     * @return the list
+     * @throws Exception the exception
      */
     List<Uri> listBackupFiles() throws Exception;
 
     /**
      * Get some kind of identifier for backup file content
      *
-     * @param uri
-     * @return
+     * @param uri the uri
+     * @return the backup file hash
+     * @throws Exception the exception
      */
     String getBackupFileHash(Uri uri) throws Exception;
 
     /**
      * Retrieve meta for given backup uri
      *
-     * @param uri
-     * @return
+     * @param uri the uri
+     * @return the backup by uri
+     * @throws Exception the exception
      */
     Backup getBackupByUri(Uri uri) throws Exception;
 
@@ -52,13 +55,17 @@ public interface BackupStorage {
     boolean supportsApkExport();
 
     /**
-     * @param config
+     * Create backup task string.
+     *
+     * @param config the config
      * @return backup task token
      */
     String createBackupTask(SingleBackupTaskConfig config);
 
     /**
-     * @param config
+     * Create batch backup task string.
+     *
+     * @param config the config
      * @return backup task token
      */
     String createBatchBackupTask(BatchBackupTaskConfig config);
@@ -109,20 +116,26 @@ public interface BackupStorage {
     }
 
     enum BackupTaskState {
-        CREATED, QUEUED, IN_PROGRESS, CANCELLED, SUCCEEDED, FAILED
+        CREATED,
+        QUEUED,
+        IN_PROGRESS,
+        CANCELLED,
+        SUCCEEDED,
+        FAILED
     }
 
     class BackupTaskStatus {
 
-        private String mToken;
-        private SingleBackupTaskConfig mConfig;
-        private BackupTaskState mState;
-        private long mCurrentProgress;
-        private long mGoal;
-        private Backup mBackup;
-        private Exception mException;
+        private final String mToken;
+        private final SingleBackupTaskConfig mConfig;
+        private final BackupTaskState mState;
+        private final long mCurrentProgress;
+        private final long mGoal;
+        private final Backup mBackup;
+        private final Exception mException;
 
-        private BackupTaskStatus(String token, SingleBackupTaskConfig config, BackupTaskState state, long currentProgress, long goal, @Nullable Backup backup, @Nullable Exception exception) {
+        private BackupTaskStatus(String token, SingleBackupTaskConfig config, BackupTaskState state, long currentProgress,
+                                 long goal, @Nullable Backup backup, @Nullable Exception exception) {
             mToken = token;
             mConfig = config;
             mState = state;
@@ -192,8 +205,8 @@ public interface BackupStorage {
 
     class BatchBackupTaskStatus {
 
-        private String mToken;
-        private BackupTaskState mState;
+        private final String mToken;
+        private final BackupTaskState mState;
 
         private SingleBackupTaskConfig mCurrentConfig;
 
@@ -220,7 +233,8 @@ public interface BackupStorage {
             return new BatchBackupTaskStatus(token, BackupTaskState.QUEUED);
         }
 
-        public static BatchBackupTaskStatus inProgress(String token, SingleBackupTaskConfig currentConfig, int totalBackupsCount, int succeededBackupsCount, int failedBackupsCount) {
+        public static BatchBackupTaskStatus inProgress(String token, SingleBackupTaskConfig currentConfig, int totalBackupsCount,
+                                                       int succeededBackupsCount, int failedBackupsCount) {
             BatchBackupTaskStatus status = new BatchBackupTaskStatus(token, BackupTaskState.IN_PROGRESS);
             status.mCurrentConfig = currentConfig;
             status.mTotalBackupsCount = totalBackupsCount;
@@ -230,7 +244,9 @@ public interface BackupStorage {
             return status;
         }
 
-        public static BatchBackupTaskStatus cancelled(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups, Map<SingleBackupTaskConfig, Exception> failedBackups, List<SingleBackupTaskConfig> cancelledBackups) {
+        public static BatchBackupTaskStatus cancelled(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups,
+                                                      Map<SingleBackupTaskConfig, Exception> failedBackups,
+                                                      List<SingleBackupTaskConfig> cancelledBackups) {
             BatchBackupTaskStatus status = new BatchBackupTaskStatus(token, BackupTaskState.CANCELLED);
             status.mSucceededBackups = succeededBackups;
             status.mFailedBackups = failedBackups;
@@ -239,7 +255,8 @@ public interface BackupStorage {
             return status;
         }
 
-        public static BatchBackupTaskStatus succeeded(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups, Map<SingleBackupTaskConfig, Exception> failedBackups) {
+        public static BatchBackupTaskStatus succeeded(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups,
+                                                      Map<SingleBackupTaskConfig, Exception> failedBackups) {
             BatchBackupTaskStatus status = new BatchBackupTaskStatus(token, BackupTaskState.SUCCEEDED);
             status.mSucceededBackups = succeededBackups;
             status.mFailedBackups = failedBackups;
@@ -247,7 +264,9 @@ public interface BackupStorage {
             return status;
         }
 
-        public static BatchBackupTaskStatus failed(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups, Map<SingleBackupTaskConfig, Exception> failedBackups, List<SingleBackupTaskConfig> remainingBackups, Exception exception) {
+        public static BatchBackupTaskStatus failed(String token, Map<SingleBackupTaskConfig, Backup> succeededBackups,
+                                                   Map<SingleBackupTaskConfig, Exception> failedBackups,
+                                                   List<SingleBackupTaskConfig> remainingBackups, Exception exception) {
             BatchBackupTaskStatus status = new BatchBackupTaskStatus(token, BackupTaskState.FAILED);
             status.mSucceededBackups = succeededBackups;
             status.mFailedBackups = failedBackups;

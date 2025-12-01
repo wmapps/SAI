@@ -56,7 +56,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         return mThemes.get(position).getTheme();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ThemeView mThemeView;
 
@@ -67,12 +67,14 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
             mThemeView = itemView.findViewById(R.id.themeview_theme_item);
 
             mThemeView.setOnClickListener(v -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
-                if (mListener != null)
+                if (mListener != null) {
                     mListener.onThemeClicked(mThemes.get(adapterPosition));
+                }
             });
         }
 

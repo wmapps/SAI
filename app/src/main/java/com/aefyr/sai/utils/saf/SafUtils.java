@@ -101,11 +101,12 @@ public class SafUtils {
     }
 
     /**
-     * @param context
-     * @param contentUri
+     * Gets file length from content uri.
+     *
+     * @param context    the context
+     * @param contentUri the content uri
      * @return file length or 0 if it's unknown
      */
-    @Nullable
     public static long getFileLengthFromContentUri(Context context, Uri contentUri) {
         DocumentFile documentFile = docFileFromSingleUriOrFileUri(context, contentUri);
 

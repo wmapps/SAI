@@ -26,7 +26,7 @@ public class BatchBackupDialogFragment extends DialogFragment {
     /**
      * Create a {@link BatchBackupDialogFragment} that will prompt user to backup all split APKs on device
      *
-     * @return
+     * @return the batch backup dialog fragment
      */
     public static BatchBackupDialogFragment newInstance() {
         return new BatchBackupDialogFragment();
@@ -36,7 +36,7 @@ public class BatchBackupDialogFragment extends DialogFragment {
      * Create a {@link BatchBackupDialogFragment} that will prompt user to backup all apps passed in {@code packages}
      *
      * @param packages app packages to backup
-     * @return
+     * @return the batch backup dialog fragment
      */
     public static BatchBackupDialogFragment newInstance(@NonNull ArrayList<String> packages) {
         Bundle args = new Bundle();
@@ -59,13 +59,16 @@ public class BatchBackupDialogFragment extends DialogFragment {
             packages = args.getStringArrayList(ARG_PACKAGES);
         }
 
-        mViewModel = new ViewModelProvider(this, new BatchBackupDialogViewModelFactory(requireContext().getApplicationContext(), packages)).get(BatchBackupDialogViewModel.class);
+        mViewModel = new ViewModelProvider(this,
+                                           new BatchBackupDialogViewModelFactory(requireContext().getApplicationContext(),
+                                                                                 packages)).get(BatchBackupDialogViewModel.class);
         mViewModel.getIsBackupEnqueued().observe(this, (isBackupEnqueued) -> {
             if (isBackupEnqueued) {
 
                 OnBatchBackupEnqueuedListener listener = Utils.getParentAs(this, OnBatchBackupEnqueuedListener.class);
-                if (listener != null)
+                if (listener != null) {
                     listener.onBatchBackupEnqueued(getTag());
+                }
 
                 dismiss();
             }
@@ -108,7 +111,9 @@ public class BatchBackupDialogFragment extends DialogFragment {
     }
 
     private String getExportPromptText() {
-        return mViewModel.getApkCount() <= 0 ? getString(R.string.backup_export_all_splits_prompt) : getString(R.string.backup_export_selected_apps_prompt, mViewModel.getApkCount());
+        return mViewModel.getApkCount() <= 0 ?
+               getString(R.string.backup_export_all_splits_prompt) :
+               getString(R.string.backup_export_selected_apps_prompt, mViewModel.getApkCount());
     }
 
     public interface OnBatchBackupEnqueuedListener {

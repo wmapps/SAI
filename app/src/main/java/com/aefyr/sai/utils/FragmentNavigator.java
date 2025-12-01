@@ -15,9 +15,9 @@ import androidx.fragment.app.FragmentTransaction;
  */
 public class FragmentNavigator {
 
-    private FragmentManager mFragmentManager;
-    private int mContainerId;
-    private FragmentFactory mFragmentFactory;
+    private final FragmentManager mFragmentManager;
+    private final int mContainerId;
+    private final FragmentFactory mFragmentFactory;
 
     private Fragment mCurrentFragment;
 
@@ -29,7 +29,8 @@ public class FragmentNavigator {
         mFragmentFactory = fragmentFactory;
     }
 
-    public FragmentNavigator(@Nullable Bundle savedInstanceState, FragmentManager fragmentManager, @IdRes int containerId, FragmentFactory fragmentFactory) {
+    public FragmentNavigator(@Nullable Bundle savedInstanceState, FragmentManager fragmentManager, @IdRes int containerId,
+                             FragmentFactory fragmentFactory) {
         this(fragmentManager, containerId, fragmentFactory);
         restoreState(savedInstanceState);
     }
@@ -37,8 +38,9 @@ public class FragmentNavigator {
     public void switchTo(String tag) {
         ensureStateWasRestored();
 
-        if (mCurrentFragment != null && tag.equals(mCurrentFragment.getTag()))
+        if (mCurrentFragment != null && tag.equals(mCurrentFragment.getTag())) {
             return;
+        }
 
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
@@ -66,7 +68,7 @@ public class FragmentNavigator {
     /**
      * Write state of this FragmentNavigator to a Bundle, do this in activity/fragment onSaveInstanceState
      *
-     * @param bundle
+     * @param bundle the bundle
      */
     public void writeStateToBundle(@NonNull Bundle bundle) {
         bundle.putString("fragment_navigator_current_fragment", mCurrentFragment != null ? mCurrentFragment.getTag() : null);
@@ -75,13 +77,14 @@ public class FragmentNavigator {
     /**
      * Restore state of a FragmentNavigator from a Bundle, do this in activity/fragment onCreate
      *
-     * @param bundle
+     * @param bundle the bundle
      */
     public void restoreState(@Nullable Bundle bundle) {
         mWasRestoreStateCalled = true;
 
-        if (bundle == null)
+        if (bundle == null) {
             return;
+        }
 
         String currentFragmentTag = bundle.getString("fragment_navigator_current_fragment", null);
         if (currentFragmentTag != null) {
@@ -92,8 +95,9 @@ public class FragmentNavigator {
     }
 
     private void ensureStateWasRestored() {
-        if (!mWasRestoreStateCalled)
+        if (!mWasRestoreStateCalled) {
             throw new IllegalStateException("Please call restoreState before using this FragmentNavigator");
+        }
     }
 
     public interface FragmentFactory {

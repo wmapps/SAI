@@ -42,13 +42,13 @@ public class Theme {
 
     private static Theme sInstance;
 
-    private Context mContext;
+    private final Context mContext;
 
-    private SharedPreferences mPrefs;
+    private final SharedPreferences mPrefs;
 
-    private List<ThemeDescriptor> mThemes;
+    private final List<ThemeDescriptor> mThemes;
 
-    private MutableLiveData<ThemeDescriptor> mLiveTheme = new MutableLiveData<>();
+    private final MutableLiveData<ThemeDescriptor> mLiveTheme = new MutableLiveData<>();
 
     private Mode mMode;
 
@@ -63,7 +63,10 @@ public class Theme {
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        mMode = Mode.valueOf(mPrefs.getString(PreferencesKeys.THEME_MODE, Utils.apiIsAtLeast(Build.VERSION_CODES.Q) ? Mode.AUTO_LIGHT_DARK.name() : Mode.CONCRETE.name()));
+        mMode = Mode.valueOf(mPrefs.getString(PreferencesKeys.THEME_MODE,
+                                              Utils.apiIsAtLeast(Build.VERSION_CODES.Q) ?
+                                              Mode.AUTO_LIGHT_DARK.name() :
+                                              Mode.CONCRETE.name()));
 
         mThemes = new ArrayList<>();
         mThemes.add(new ThemeDescriptor(0, R.style.AppTheme_Light, false, R.string.theme_sai, false));
@@ -112,8 +115,9 @@ public class Theme {
             case CONCRETE:
                 return getConcreteTheme();
             case AUTO_LIGHT_DARK:
-                if (shouldUseDarkThemeForAutoMode())
+                if (shouldUseDarkThemeForAutoMode()) {
                     return getDarkTheme();
+                }
 
                 return getLightTheme();
         }
@@ -130,8 +134,9 @@ public class Theme {
     }
 
     public void setMode(Mode mode) {
-        if (mode == mMode)
+        if (mode == mMode) {
             return;
+        }
 
         mPrefs.edit().putString(PreferencesKeys.THEME_MODE, mode.name()).apply();
         mMode = mode;
@@ -146,8 +151,9 @@ public class Theme {
     public void setConcreteTheme(ThemeDescriptor theme) {
         saveThemeId(THEME_TAG_CONCRETE, theme.getId());
 
-        if (getThemeMode() == Mode.CONCRETE)
+        if (getThemeMode() == Mode.CONCRETE) {
             invalidateLiveTheme();
+        }
     }
 
     public ThemeDescriptor getLightTheme() {
@@ -157,8 +163,9 @@ public class Theme {
     public void setLightTheme(ThemeDescriptor theme) {
         saveThemeId(THEME_TAG_LIGHT, theme.getId());
 
-        if (getThemeMode() == Mode.AUTO_LIGHT_DARK && !shouldUseDarkThemeForAutoMode())
+        if (getThemeMode() == Mode.AUTO_LIGHT_DARK && !shouldUseDarkThemeForAutoMode()) {
             invalidateLiveTheme();
+        }
     }
 
     public ThemeDescriptor getDarkTheme() {
@@ -168,17 +175,20 @@ public class Theme {
     public void setDarkTheme(ThemeDescriptor theme) {
         saveThemeId(THEME_TAG_DARK, theme.getId());
 
-        if (getThemeMode() == Mode.AUTO_LIGHT_DARK && shouldUseDarkThemeForAutoMode())
+        if (getThemeMode() == Mode.AUTO_LIGHT_DARK && shouldUseDarkThemeForAutoMode()) {
             invalidateLiveTheme();
+        }
     }
 
     private boolean shouldUseDarkThemeForAutoMode() {
-        return (mContext.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        return (mContext.getResources()
+                        .getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
     }
 
     private ThemeDescriptor getThemeDescriptorById(int themeId) {
-        if (themeId >= mThemes.size())
+        if (themeId >= mThemes.size()) {
             return mThemes.get(0);
+        }
 
         return mThemes.get(themeId);
     }
@@ -193,22 +203,24 @@ public class Theme {
 
     private void invalidateLiveTheme() {
         ThemeDescriptor currentTheme = getCurrentTheme();
-        if (!currentTheme.equals(mLiveTheme.getValue()))
+        if (!currentTheme.equals(mLiveTheme.getValue())) {
             mLiveTheme.setValue(currentTheme);
+        }
     }
 
     public static class ThemeDescriptor {
-        private int mId;
+        private final int mId;
 
         @StyleRes
-        private int mTheme;
-        private boolean mIsDark;
+        private final int mTheme;
+        private final boolean mIsDark;
 
         @StringRes
         private int mNameStringRes;
-        private boolean mDonationRequired;
+        private final boolean mDonationRequired;
 
-        private ThemeDescriptor(int id, @StyleRes int theme, boolean isDark, @StringRes int nameStringRes, boolean donationRequired) {
+        private ThemeDescriptor(int id, @StyleRes int theme, boolean isDark, @StringRes int nameStringRes,
+                                boolean donationRequired) {
             mId = id;
             mTheme = theme;
             mIsDark = isDark;

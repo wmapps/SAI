@@ -45,7 +45,12 @@ import java.util.Objects;
 
 import rikka.shizuku.Shizuku;
 
-public class PreferencesFragment extends PreferenceFragmentCompat implements FilePickerDialogFragment.OnFilesSelectedListener, SingleChoiceListDialogFragment.OnItemSelectedListener, BaseBottomSheetDialogFragment.OnDismissListener, SharedPreferences.OnSharedPreferenceChangeListener, DarkLightThemeSelectionDialogFragment.OnDarkLightThemesChosenListener, Shizuku.OnRequestPermissionResultListener {
+public class PreferencesFragment extends PreferenceFragmentCompat implements FilePickerDialogFragment.OnFilesSelectedListener,
+                                                                             SingleChoiceListDialogFragment.OnItemSelectedListener,
+                                                                             BaseBottomSheetDialogFragment.OnDismissListener,
+                                                                             SharedPreferences.OnSharedPreferenceChangeListener,
+                                                                             DarkLightThemeSelectionDialogFragment.OnDarkLightThemesChosenListener,
+                                                                             Shizuku.OnRequestPermissionResultListener {
 
     private PreferencesHelper mHelper;
     private PackageManager mPm;
@@ -54,7 +59,6 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
     private Preference mFilePickerSortPref;
     private Preference mInstallerPref;
     private Preference mThemePref;
-    private SwitchPreference mAutoThemeSwitch;
     private Preference mAutoThemePicker;
 
     private FilePickerDialogFragment mPendingFilePicker;
@@ -68,7 +72,8 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         //Inject current auto theme status since it isn't managed by PreferencesKeys.AUTO_THEME key
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
         SharedPreferences.Editor prefsEditor = prefs.edit();
-        prefsEditor.putBoolean(PreferencesKeys.AUTO_THEME, Theme.getInstance(requireContext()).getThemeMode() == Theme.Mode.AUTO_LIGHT_DARK).apply();
+        prefsEditor.putBoolean(PreferencesKeys.AUTO_THEME,
+                               Theme.getInstance(requireContext()).getThemeMode() == Theme.Mode.AUTO_LIGHT_DARK).apply();
 
         //Inject apk proxy activity state since there's no guarantee preference value matches actual state
         int apkProxyActivityState = mPm.getComponentEnabledSetting(ApkActionViewProxyActivity.getComponentName(requireContext()));
@@ -113,7 +118,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         mFilePickerSortPref = findPreference("file_picker_sort");
         updateFilePickerSortSummary();
         mFilePickerSortPref.setOnPreferenceClickListener((p) -> {
-            SingleChoiceListDialogFragment.newInstance(getText(R.string.settings_main_file_picker_sort), R.array.file_picker_sort_variants, mHelper.getFilePickerRawSort()).show(getChildFragmentManager(), "sort");
+            SingleChoiceListDialogFragment.newInstance(getText(R.string.settings_main_file_picker_sort),
+                                                       R.array.file_picker_sort_variants,
+                                                       mHelper.getFilePickerRawSort()).show(getChildFragmentManager(), "sort");
             return true;
         });
 
@@ -132,7 +139,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         mInstallerPref = findPreference("installer");
         updateInstallerSummary();
         mInstallerPref.setOnPreferenceClickListener((p -> {
-            SingleChoiceListDialogFragment.newInstance(getText(R.string.settings_main_installer), R.array.installers, mHelper.getInstaller()).show(getChildFragmentManager(), "installer");
+            SingleChoiceListDialogFragment.newInstance(getText(R.string.settings_main_installer),
+                                                       R.array.installers,
+                                                       mHelper.getInstaller()).show(getChildFragmentManager(), "installer");
             return true;
         }));
 
@@ -151,15 +160,19 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
             mThemePref.setVisible(false);
         }
 
-        mAutoThemeSwitch = Objects.requireNonNull(findPreference(PreferencesKeys.AUTO_THEME));
+        final SwitchPreference autoThemeSwitch = Objects.requireNonNull(findPreference(PreferencesKeys.AUTO_THEME));
         mAutoThemePicker = findPreference(PreferencesKeys.AUTO_THEME_PICKER);
         updateAutoThemePickerSummary();
 
-        mAutoThemeSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
+        autoThemeSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
             boolean value = (boolean) newValue;
             if (value) {
-                if (!Utils.apiIsAtLeast(Build.VERSION_CODES.Q))
-                    SimpleAlertDialogFragment.newInstance(requireContext(), R.string.settings_main_auto_theme, R.string.settings_main_auto_theme_pre_q_warning).show(getChildFragmentManager(), null);
+                if (!Utils.apiIsAtLeast(Build.VERSION_CODES.Q)) {
+                    SimpleAlertDialogFragment.newInstance(requireContext(),
+                                                          R.string.settings_main_auto_theme,
+                                                          R.string.settings_main_auto_theme_pre_q_warning)
+                                             .show(getChildFragmentManager(), null);
+                }
 
                 Theme.getInstance(requireContext()).setMode(Theme.Mode.AUTO_LIGHT_DARK);
             } else {
@@ -183,7 +196,11 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         SwitchPreference enableApkActionViewPref = findPreference(PreferencesKeys.ENABLE_APK_ACTION_VIEW);
         enableApkActionViewPref.setOnPreferenceChangeListener((preference, newValue) -> {
             boolean enabled = (boolean) newValue;
-            mPm.setComponentEnabledSetting(ApkActionViewProxyActivity.getComponentName(requireContext()), enabled ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT : PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            mPm.setComponentEnabledSetting(ApkActionViewProxyActivity.getComponentName(requireContext()),
+                                           enabled ?
+                                           PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
+                                           PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                                           PackageManager.DONT_KILL_APP);
             return true;
         });
 
@@ -220,11 +237,13 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
     }
 
     private void updateFilePickerSortSummary() {
-        mFilePickerSortPref.setSummary(getString(R.string.settings_main_file_picker_sort_summary, getResources().getStringArray(R.array.file_picker_sort_variants)[mHelper.getFilePickerRawSort()]));
+        mFilePickerSortPref.setSummary(getString(R.string.settings_main_file_picker_sort_summary,
+                                                 getResources().getStringArray(R.array.file_picker_sort_variants)[mHelper.getFilePickerRawSort()]));
     }
 
     private void updateInstallerSummary() {
-        mInstallerPref.setSummary(getString(R.string.settings_main_installer_summary, getResources().getStringArray(R.array.installers)[mHelper.getInstaller()]));
+        mInstallerPref.setSummary(getString(R.string.settings_main_installer_summary,
+                                            getResources().getStringArray(R.array.installers)[mHelper.getInstaller()]));
     }
 
     private void updateThemeSummary() {
@@ -233,7 +252,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
 
     private void updateAutoThemePickerSummary() {
         Theme theme = Theme.getInstance(requireContext());
-        mAutoThemePicker.setSummary(getString(R.string.settings_main_auto_theme_picker_summary, theme.getLightTheme().getName(requireContext()), theme.getDarkTheme().getName(requireContext())));
+        mAutoThemePicker.setSummary(getString(R.string.settings_main_auto_theme_picker_summary,
+                                              theme.getLightTheme().getName(requireContext()),
+                                              theme.getDarkTheme().getName(requireContext())));
     }
 
     @Override
@@ -241,9 +262,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PermissionsUtils.REQUEST_CODE_STORAGE_PERMISSIONS) {
-            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
+            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_storage);
-            else {
+            } else {
                 if (mPendingFilePicker != null) {
                     openFilePicker(mPendingFilePicker);
                     mPendingFilePicker = null;
@@ -252,9 +273,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
         }
 
         if (requestCode == PermissionsUtils.REQUEST_CODE_SHIZUKU) {
-            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
+            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_shizuku);
-            else {
+            } else {
                 mHelper.setInstaller(PreferencesValues.INSTALLER_SHIZUKU);
                 updateInstallerSummary();
             }
@@ -263,11 +284,9 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
 
     @Override
     public void onFilesSelected(String tag, List<File> files) {
-        switch (tag) {
-            case "home":
-                mHelper.setHomeDirectory(files.get(0).getAbsolutePath());
-                updateHomeDirPrefSummary();
-                break;
+        if (tag.equals("home")) {
+            mHelper.setHomeDirectory(files.get(0).getAbsolutePath());
+            updateHomeDirPrefSummary();
         }
     }
 
@@ -350,10 +369,8 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
 
     @Override
     public void onDialogDismissed(@NonNull String dialogTag) {
-        switch (dialogTag) {
-            case "theme":
-                updateThemeSummary();
-                break;
+        if ("theme".equals(dialogTag)) {
+            updateThemeSummary();
         }
     }
 
@@ -370,8 +387,10 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
     @SuppressLint("ApplySharedPref")
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (key.equals(PreferencesKeys.USE_OLD_INSTALLER)) {
-            prefs.edit().putBoolean(PreferencesKeys.USE_OLD_INSTALLER, prefs.getBoolean(PreferencesKeys.USE_OLD_INSTALLER, false)).commit();
+        if (PreferencesKeys.USE_OLD_INSTALLER.equals(key)) {
+            prefs.edit()
+                 .putBoolean(PreferencesKeys.USE_OLD_INSTALLER, prefs.getBoolean(PreferencesKeys.USE_OLD_INSTALLER, false))
+                 .commit();
             Utils.hardRestartApp(requireContext());
         }
     }
@@ -385,15 +404,13 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Fil
 
     @Override
     public void onRequestPermissionResult(int requestCode, int grantResult) {
-        switch (requestCode) {
-            case PermissionsUtils.REQUEST_CODE_SHIZUKU:
-                if (grantResult == PackageManager.PERMISSION_DENIED)
-                    AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_shizuku);
-                else {
-                    mHelper.setInstaller(PreferencesValues.INSTALLER_SHIZUKU);
-                    updateInstallerSummary();
-                }
-                break;
+        if (requestCode == PermissionsUtils.REQUEST_CODE_SHIZUKU) {
+            if (grantResult == PackageManager.PERMISSION_DENIED) {
+                AlertsUtils.showAlert(this, R.string.error, R.string.permissions_required_shizuku);
+            } else {
+                mHelper.setInstaller(PreferencesValues.INSTALLER_SHIZUKU);
+                updateInstallerSummary();
+            }
         }
     }
 }

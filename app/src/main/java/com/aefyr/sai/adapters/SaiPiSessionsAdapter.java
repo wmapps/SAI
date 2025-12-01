@@ -20,8 +20,8 @@ import java.util.List;
 
 public class SaiPiSessionsAdapter extends RecyclerView.Adapter<SaiPiSessionsAdapter.ViewHolder> {
 
-    private Context mContext;
-    private LayoutInflater mInflater;
+    private final Context mContext;
+    private final LayoutInflater mInflater;
 
     private List<SaiPiSessionState> mSessions;
 
@@ -69,23 +69,25 @@ public class SaiPiSessionsAdapter extends RecyclerView.Adapter<SaiPiSessionsAdap
     }
 
     private void launchApp(String packageName) {
-        if (mActionDelegate != null)
+        if (mActionDelegate != null) {
             mActionDelegate.launchApp(packageName);
+        }
     }
 
     private void showException(String shortError, String fullError) {
-        if (mActionDelegate != null)
+        if (mActionDelegate != null) {
             mActionDelegate.showError(shortError, fullError);
+        }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ViewGroup mContainer;
-        private ShimmerFrameLayout mShimmer;
-        private TextView mName;
-        private TextView mStatus;
-        private ImageView mAppIcon;
-        private ImageView mActionIcon;
+        private final ViewGroup mContainer;
+        private final ShimmerFrameLayout mShimmer;
+        private final TextView mName;
+        private final TextView mStatus;
+        private final ImageView mAppIcon;
+        private final ImageView mActionIcon;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,9 +100,10 @@ public class SaiPiSessionsAdapter extends RecyclerView.Adapter<SaiPiSessionsAdap
             mActionIcon = itemView.findViewById(R.id.iv_installed_app_action);
 
             mContainer.setOnClickListener((v) -> {
-                int adapterPosition = getAdapterPosition();
-                if (adapterPosition == RecyclerView.NO_POSITION)
+                int adapterPosition = getBindingAdapterPosition();
+                if (adapterPosition == RecyclerView.NO_POSITION) {
                     return;
+                }
 
                 SaiPiSessionState state = mSessions.get(adapterPosition);
                 switch (state.status()) {
@@ -126,14 +129,14 @@ public class SaiPiSessionsAdapter extends RecyclerView.Adapter<SaiPiSessionsAdap
 
             if (packageMeta != null) {
                 Glide.with(mAppIcon)
-                        .load(packageMeta.iconUri != null ? packageMeta.iconUri : R.drawable.placeholder_app_icon)
-                        .placeholder(R.drawable.placeholder_app_icon)
-                        .into(mAppIcon);
+                     .load(packageMeta.iconUri != null ? packageMeta.iconUri : R.drawable.placeholder_app_icon)
+                     .placeholder(R.drawable.placeholder_app_icon)
+                     .into(mAppIcon);
             } else {
                 Glide.with(mAppIcon)
-                        .load(R.drawable.placeholder_app_icon)
-                        .placeholder(R.drawable.placeholder_app_icon)
-                        .into(mAppIcon);
+                     .load(R.drawable.placeholder_app_icon)
+                     .placeholder(R.drawable.placeholder_app_icon)
+                     .into(mAppIcon);
             }
 
             mStatus.setText(state.status().getReadableName(mContext));
@@ -158,7 +161,7 @@ public class SaiPiSessionsAdapter extends RecyclerView.Adapter<SaiPiSessionsAdap
                     mContainer.setEnabled(false);
 
                     mShimmer.showShimmer(true);
-                    mShimmer.startShimmer(); //for some reason it doesn't start via showShimmer(true)
+                    mShimmer.startShimmer(); //for some reason it does not start via showShimmer(true)
                     break;
             }
         }

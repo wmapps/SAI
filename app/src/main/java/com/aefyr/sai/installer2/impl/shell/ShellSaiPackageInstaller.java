@@ -38,12 +38,10 @@ import java.util.regex.Pattern;
 
 public abstract class ShellSaiPackageInstaller extends BaseSaiPackageInstaller {
 
-    private static Semaphore mSharedSemaphore = new Semaphore(1);
-    private AtomicBoolean mAwaitingBroadcast = new AtomicBoolean(false);
+    private static final Semaphore mSharedSemaphore = new Semaphore(1);
+    private final AtomicBoolean mAwaitingBroadcast = new AtomicBoolean(false);
 
-    private ExecutorService mExecutor = Executors.newFixedThreadPool(4);
-    private HandlerThread mWorkerThread = new HandlerThread("RootlessSaiPi Worker");
-    private Handler mWorkerHandler;
+    private final ExecutorService mExecutor = Executors.newFixedThreadPool(4);
 
     private String mCurrentSessionId;
 
@@ -78,12 +76,13 @@ public abstract class ShellSaiPackageInstaller extends BaseSaiPackageInstaller {
     protected ShellSaiPackageInstaller(Context c) {
         super(c);
 
-        mWorkerThread.start();
-        mWorkerHandler = new Handler(mWorkerThread.getLooper());
+        final HandlerThread workerThread = new HandlerThread("RootlessSaiPi Worker");
+        workerThread.start();
+        final Handler workerHandler = new Handler(workerThread.getLooper());
 
         IntentFilter packageAddedFilter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         packageAddedFilter.addDataScheme("package");
-        getContext().registerReceiver(mPackageInstalledBroadcastReceiver, packageAddedFilter, null, mWorkerHandler);
+        getContext().registerReceiver(mPackageInstalledBroadcastReceiver, packageAddedFilter, null, workerHandler);
     }
 
     @Override
@@ -126,7 +125,7 @@ public abstract class ShellSaiPackageInstaller extends BaseSaiPackageInstaller {
                 String shortError = getContext().getString(R.string.installer_error_shell, getInstallerName(), getSessionInfo(apkSource) + "\n\n" + parseError(installationResult));
                 setSessionState(sessionId, new SaiPiSessionState.Builder(sessionId, SaiPiSessionStatus.INSTALLATION_FAILED)
                         .appTempName(appTempName)
-                        .error(shortError, shortError + "\n\n" + installationResult.toString())
+                        .error(shortError, shortError + "\n\n" + installationResult)
                         .build());
 
                 unlockInstallation();

@@ -42,15 +42,16 @@ public class InstallationConfirmationDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null)
+        if (args == null) {
             return;
+        }
         mApksFileUri = args.getParcelable(ARG_APKS_FILE);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
+        return new AlertDialog.Builder(requireContext())
                 .setMessage(getString(R.string.installer_installation_confirmation, getFileNameFromUri(mApksFileUri)))
                 .setPositiveButton(R.string.yes, (d, w) -> {
                     mListener.onConfirmed(mApksFileUri);
@@ -64,31 +65,37 @@ public class InstallationConfirmationDialogFragment extends DialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            if (getParentFragment() != null)
+            if (getParentFragment() != null) {
                 mListener = (ConfirmationListener) getParentFragment();
-            else
+            } else {
                 mListener = (ConfirmationListener) getActivity();
+            }
         } catch (Exception e) {
-            throw new IllegalStateException("Activity/Fragment that uses InstallationConfirmationDialogFragment must implement InstallationConfirmationDialogFragment.ConfirmationListener");
+            throw new IllegalStateException(
+                    "Activity/Fragment that uses InstallationConfirmationDialogFragment must implement InstallationConfirmationDialogFragment.ConfirmationListener");
         }
     }
 
     private String getFileNameFromUri(Uri uri) {
-        if (uri.getPath() == null)
+        if (uri.getPath() == null) {
             return "???";
+        }
 
         String[] pathParts = uri.getPath().split("/");
         String fallbackName = pathParts[pathParts.length - 1];
 
-        try (Cursor cursor = getContext().getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DISPLAY_NAME}, null, null, null)) {
-            if (cursor == null)
+        try (Cursor cursor = requireContext().getContentResolver()
+                                             .query(uri, new String[]{MediaStore.MediaColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor == null) {
                 return fallbackName;
+            }
 
             cursor.moveToFirst();
             String name = cursor.getString(0);
 
-            if (name == null)
+            if (name == null) {
                 return fallbackName;
+            }
 
             return name;
         } catch (Exception e) {

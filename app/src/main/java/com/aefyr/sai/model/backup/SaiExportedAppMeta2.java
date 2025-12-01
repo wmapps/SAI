@@ -26,7 +26,7 @@ public class SaiExportedAppMeta2 {
 
     @SerializedName("meta_version")
     @Expose
-    private Long mMetaVersion = 2L;
+    private final Long mMetaVersion = 2L;
 
     @SerializedName("package")
     @Expose
@@ -71,7 +71,8 @@ public class SaiExportedAppMeta2 {
 
     }
 
-    public static SaiExportedAppMeta2 createForPackage(Context context, String pkg, long exportTimestamp) throws PackageManager.NameNotFoundException {
+    public static SaiExportedAppMeta2 createForPackage(Context context, String pkg, long exportTimestamp) throws
+                                                                                                          PackageManager.NameNotFoundException {
         PackageManager pm = context.getPackageManager();
         PackageInfo packageInfo = context.getPackageManager().getPackageInfo(pkg, 0);
 
@@ -99,8 +100,9 @@ public class SaiExportedAppMeta2 {
     }
 
     public SaiExportedAppMeta2 addBackupComponent(String type, long size) {
-        if (mBackupComponents == null)
+        if (mBackupComponents == null) {
             mBackupComponents = new ArrayList<>();
+        }
 
         mBackupComponents.add(new BackupComponent(type, size));
         return this;
@@ -161,11 +163,11 @@ public class SaiExportedAppMeta2 {
 
         @SerializedName("type")
         @Expose
-        private String mType;
+        private final String mType;
 
         @SerializedName("size")
         @Expose
-        private Long mSize;
+        private final Long mSize;
 
         private BackupComponent(String type, long size) {
             mType = type;

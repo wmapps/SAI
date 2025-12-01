@@ -143,7 +143,7 @@ public class Utils {
         return typedValue.data;
     }
 
-    private static Handler sMainThreadHandler = new Handler(Looper.getMainLooper());
+    private static final Handler sMainThreadHandler = new Handler(Looper.getMainLooper());
 
     public static void onMainThread(Runnable r) {
         sMainThreadHandler.post(r);
@@ -215,10 +215,10 @@ public class Utils {
      * Create a file within {@code dir} directory in app's cache directory. File will have a random name.
      * Even though this method is called createTEMPfile, created file won't be deleted automatically
      *
-     * @param context
-     * @param dir
-     * @param extension
-     * @return
+     * @param context   the context
+     * @param dir       the dir
+     * @param extension the extension
+     * @return the file
      */
     @Nullable
     public static File createTempFileInCache(Context context, String dir, String extension) {
@@ -284,7 +284,6 @@ public class Utils {
         } finally {
             if (bitmap != null)
                 bitmap.recycle();
-            ;
         }
 
     }

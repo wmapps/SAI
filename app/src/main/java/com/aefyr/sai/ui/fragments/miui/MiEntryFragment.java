@@ -42,7 +42,10 @@ public class MiEntryFragment extends SaiBaseFragment {
 
         setupMD3Animations();
 
-        ((TextView) findViewById(R.id.tv_mi_miui_ver)).setText(getString(R.string.mi_miui_version, MiuiUtils.getMiuiVersionName(), MiuiUtils.getMiuiVersionCode(), MiuiUtils.getActualMiuiVersion()));
+        ((TextView) findViewById(R.id.tv_mi_miui_ver)).setText(getString(R.string.mi_miui_version,
+                                                                         MiuiUtils.getMiuiVersionName(),
+                                                                         MiuiUtils.getMiuiVersionCode(),
+                                                                         MiuiUtils.getActualMiuiVersion()));
 
         findViewById(R.id.button_mi_open_dev_settings).setOnClickListener(v -> openDevSettings());
 
@@ -82,8 +85,14 @@ public class MiEntryFragment extends SaiBaseFragment {
             title.setScaleY(scale);
         });
 
-        ValueAnimator textColorAnimator = ValueAnimator.ofArgb(Color.parseColor("#FF0000"), Color.parseColor("#FF7F00"),
-                Color.parseColor("#FFFF00"), Color.parseColor("#00FF00"), Color.parseColor("#0000FF"), Color.parseColor("#2E2B5F"), Color.parseColor("#8B00FF"), Color.parseColor("#FF0000"));
+        ValueAnimator textColorAnimator = ValueAnimator.ofArgb(Color.parseColor("#FF0000"),
+                                                               Color.parseColor("#FF7F00"),
+                                                               Color.parseColor("#FFFF00"),
+                                                               Color.parseColor("#00FF00"),
+                                                               Color.parseColor("#0000FF"),
+                                                               Color.parseColor("#2E2B5F"),
+                                                               Color.parseColor("#8B00FF"),
+                                                               Color.parseColor("#FF0000"));
         textColorAnimator.setDuration(3000);
         textColorAnimator.setRepeatMode(ValueAnimator.RESTART);
         textColorAnimator.setRepeatCount(ValueAnimator.INFINITE);
@@ -102,20 +111,23 @@ public class MiEntryFragment extends SaiBaseFragment {
         try {
             startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
         } catch (Exception e) {
-            SimpleAlertDialogFragment.newInstance(getString(R.string.error), getString(R.string.installer_miui_warning_oof)).show(getChildFragmentManager(), "alert_oof");
+            SimpleAlertDialogFragment.newInstance(getString(R.string.error), getString(R.string.installer_miui_warning_oof))
+                                     .show(getChildFragmentManager(), "alert_oof");
         }
     }
 
     private void doContinue() {
         try {
             OnContinueListener listener;
-            if (getParentFragment() != null)
+            if (getParentFragment() != null) {
                 listener = (OnContinueListener) getParentFragment();
-            else
+            } else {
                 listener = (OnContinueListener) getActivity();
+            }
 
-            if (listener != null)
+            if (listener != null) {
                 listener.onContinue();
+            }
         } catch (Exception e) {
             throw new IllegalStateException("OnContinueListener not implemented in host");
         }

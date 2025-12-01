@@ -25,8 +25,8 @@ import java.util.List;
 public class DefaultUriMessResolver implements UriMessResolver {
     private static final String TAG = "DefaultMessResolver";
 
-    private Context mContext;
-    private SplitApkSourceMetaResolver mMetaResolver;
+    private final Context mContext;
+    private final SplitApkSourceMetaResolver mMetaResolver;
 
     public DefaultUriMessResolver(Context context, SplitApkSourceMetaResolver metaResolver) {
         mContext = context;
@@ -74,7 +74,7 @@ public class DefaultUriMessResolver implements UriMessResolver {
         }
 
         //TODO maybe group single apks by package
-        if (apkFileUris.size() > 0) {
+        if (!apkFileUris.isEmpty()) {
             try {
                 ApkSourceMetaResolutionResult resolutionResult = mMetaResolver.resolveFor(new MultipleApkFilesApkSourceFile(apkFileUris, uriHost));
                 if (resolutionResult.isSuccessful())
@@ -92,8 +92,8 @@ public class DefaultUriMessResolver implements UriMessResolver {
 
     private static class MultipleApkFilesApkSourceFile implements ApkSourceFile {
 
-        private List<Uri> mUris;
-        private UriHost mUriHost;
+        private final List<Uri> mUris;
+        private final UriHost mUriHost;
 
         private MultipleApkFilesApkSourceFile(List<Uri> uris, UriHost uriHost) {
             mUris = uris;
@@ -123,7 +123,7 @@ public class DefaultUriMessResolver implements UriMessResolver {
 
         private static class InternalEntry extends Entry {
 
-            private Uri mUri;
+            private final Uri mUri;
 
             private InternalEntry(Uri uri, String name, String localPath, long size) {
                 super(name, localPath, size);

@@ -57,25 +57,25 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     private static DefaultBackupManager sInstance;
 
-    private Context mContext;
-    private BackupStorageProvider mStorageProvider;
-    private BackupStorage mStorage;
-    private BackupIndex mIndex;
-    private PreferencesHelper mPrefsHelper;
-    private FlexSaiPackageInstaller mInstaller;
+    private final Context mContext;
+    private final BackupStorageProvider mStorageProvider;
+    private final BackupStorage mStorage;
+    private final BackupIndex mIndex;
+    private final PreferencesHelper mPrefsHelper;
+    private final FlexSaiPackageInstaller mInstaller;
 
     private Map<String, PackageMeta> mInstalledApps;
-    private MutableLiveData<List<PackageMeta>> mInstalledAppsLiveData = new MutableLiveData<>(Collections.emptyList());
-    private Handler mWorkerHandler;
+    private final MutableLiveData<List<PackageMeta>> mInstalledAppsLiveData = new MutableLiveData<>(Collections.emptyList());
+    private final Handler mWorkerHandler;
 
     private Map<String, BackupApp> mApps;
-    private MutableLiveData<List<BackupApp>> mAppsLiveData = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<BackupApp>> mAppsLiveData = new MutableLiveData<>(Collections.emptyList());
 
-    private MutableLiveData<IndexingStatus> mIndexingStatus = new MutableLiveData<>(new IndexingStatus());
+    private final MutableLiveData<IndexingStatus> mIndexingStatus = new MutableLiveData<>(new IndexingStatus());
 
     private final Set<AppsObserver> mAppsObservers = new HashSet<>();
 
-    private ExecutorService mMiscExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService mMiscExecutor = Executors.newCachedThreadPool();
 
     public static synchronized DefaultBackupManager getInstance(Context context) {
         return sInstance != null ? sInstance : new DefaultBackupManager(context);
@@ -160,14 +160,16 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
             try {
                 mStorage.deleteBackup(backupUri);
 
-                if (callback != null && callbackHandler != null)
+                if (callback != null && callbackHandler != null) {
                     callbackHandler.post(() -> callback.onBackupDeleted(backupUri));
+                }
 
             } catch (Exception e) {
                 Log.w(TAG, "Unable to delete backup", e);
 
-                if (callback != null && callbackHandler != null)
+                if (callback != null && callbackHandler != null) {
                     callbackHandler.post(() -> callback.onFailedToDeleteBackup(backupUri, e));
+                }
             }
         });
     }
@@ -176,7 +178,8 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
     public void restoreBackup(Uri backupUri) {
         mMiscExecutor.execute(() -> {
             ApkSource apkSource = mStorage.createApkSource(backupUri);
-            mInstaller.enqueueSession(mInstaller.createSessionOnInstaller(mPrefsHelper.getInstaller(), new SaiPiSessionParams(apkSource)));
+            mInstaller.enqueueSession(mInstaller.createSessionOnInstaller(mPrefsHelper.getInstaller(),
+                                                                          new SaiPiSessionParams(apkSource)));
         });
     }
 
@@ -187,8 +190,9 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     @Override
     public BackupStorageProvider getBackupStorageProvider(String storageId) {
-        if (mStorageProvider.getId().equals(storageId))
+        if (mStorageProvider.getId().equals(storageId)) {
             return mStorageProvider;
+        }
 
         throw new IllegalArgumentException("Unknown storage provider");
     }
@@ -226,15 +230,17 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     private void notifyInstalledAppInvalidated(String pkg) {
         synchronized (mAppsObservers) {
-            for (AppsObserver observer : mAppsObservers)
+            for (AppsObserver observer : mAppsObservers) {
                 observer.onInstalledAppInvalidated(pkg);
+            }
         }
     }
 
     private void notifyAppInvalidated(String pkg) {
         synchronized (mAppsObservers) {
-            for (AppsObserver observer : mAppsObservers)
+            for (AppsObserver observer : mAppsObservers) {
                 observer.onAppInvalidated(pkg);
+            }
         }
     }
 
@@ -252,18 +258,22 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
         for (PackageInfo packageInfo : packageInfos) {
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
 
-            PackageMeta packageMeta = new PackageMeta.Builder(applicationInfo.packageName)
-                    .setLabel(applicationInfo.loadLabel(pm).toString())
-                    .setHasSplits(applicationInfo.splitPublicSourceDirs != null && applicationInfo.splitPublicSourceDirs.length > 0)
-                    .setIsSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                    .setVersionCode(Utils.apiIsAtLeast(Build.VERSION_CODES.P) ? packageInfo.getLongVersionCode() : packageInfo.versionCode)
-                    .setVersionName(packageInfo.versionName)
-                    .setIcon(applicationInfo.icon)
-                    .setInstallTime(packageInfo.firstInstallTime)
-                    .setUpdateTime(packageInfo.lastUpdateTime)
-                    .build();
+            if (applicationInfo != null) {
+                PackageMeta packageMeta = new PackageMeta.Builder(applicationInfo.packageName)
+                        .setLabel(applicationInfo.loadLabel(pm).toString())
+                        .setHasSplits(applicationInfo.splitPublicSourceDirs != null && applicationInfo.splitPublicSourceDirs.length > 0)
+                        .setIsSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                        .setVersionCode(Utils.apiIsAtLeast(Build.VERSION_CODES.P) ?
+                                        packageInfo.getLongVersionCode() :
+                                        packageInfo.versionCode)
+                        .setVersionName(packageInfo.versionName)
+                        .setIcon(applicationInfo.icon)
+                        .setInstallTime(packageInfo.firstInstallTime)
+                        .setUpdateTime(packageInfo.lastUpdateTime)
+                        .build();
 
-            packages.put(packageMeta.packageName, packageMeta);
+                packages.put(packageMeta.packageName, packageMeta);
+            }
         }
 
         Log.d(TAG, String.format("Loaded packages in %d ms", (System.currentTimeMillis() - start)));
@@ -339,19 +349,25 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
             Backup backup = mIndex.getLatestBackupForPackage(packageMeta.packageName);
             if (backup != null) {
-                backupApps.put(packageMeta.packageName, new BackupAppImpl(packageMeta, true, BackupStatus.fromInstalledAppAndBackupVersions(packageMeta.versionCode, backup.versionCode())));
+                backupApps.put(packageMeta.packageName,
+                               new BackupAppImpl(packageMeta,
+                                                 true,
+                                                 BackupStatus.fromInstalledAppAndBackupVersions(packageMeta.versionCode,
+                                                                                                backup.versionCode())));
             } else {
                 backupApps.put(packageMeta.packageName, new BackupAppImpl(packageMeta, true, BackupStatus.NO_BACKUP));
             }
         }
 
         for (String pkg : mIndex.getAllPackages()) {
-            if (mInstalledApps.containsKey(pkg))
+            if (mInstalledApps.containsKey(pkg)) {
                 continue;
+            }
 
             Backup backup = mIndex.getLatestBackupForPackage(pkg);
-            if (backup == null)
+            if (backup == null) {
                 continue;
+            }
 
             backupApps.put(pkg, new BackupAppImpl(backup.toPackageMeta(), false, BackupStatus.APP_NOT_INSTALLED));
         }
@@ -377,7 +393,11 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
         if (packageMeta != null) {
             Backup backup = mIndex.getLatestBackupForPackage(packageMeta.packageName);
             if (backup != null) {
-                mApps.put(packageMeta.packageName, new BackupAppImpl(packageMeta, true, BackupStatus.fromInstalledAppAndBackupVersions(packageMeta.versionCode, backup.versionCode())));
+                mApps.put(packageMeta.packageName,
+                          new BackupAppImpl(packageMeta,
+                                            true,
+                                            BackupStatus.fromInstalledAppAndBackupVersions(packageMeta.versionCode,
+                                                                                           backup.versionCode())));
             } else {
                 mApps.put(packageMeta.packageName, new BackupAppImpl(packageMeta, true, BackupStatus.NO_BACKUP));
             }
@@ -398,8 +418,9 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
     }
 
     private void enforceWorkerThread() {
-        if (Looper.myLooper() != mWorkerHandler.getLooper())
+        if (Looper.myLooper() != mWorkerHandler.getLooper()) {
             throw new RuntimeException("This method must be invoked on mWorkerHandler");
+        }
     }
 
     @Override
@@ -424,7 +445,8 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
         Backup backup = mIndex.deleteEntryByUri(backupUri);
         if (backup == null) {
-            Log.w(TAG, String.format("Meta from deleteEntryByUri for uri %s in storage %s is null", backupUri.toString(), storageId));
+            Log.w(TAG,
+                  String.format("Meta from deleteEntryByUri for uri %s in storage %s is null", backupUri.toString(), storageId));
             return;
         }
         updateAppInAppList(backup.pkg());
@@ -445,9 +467,9 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     private static class BackupAppImpl implements BackupApp {
 
-        private PackageMeta mPackageMeta;
-        private boolean mIsInstalled;
-        private BackupStatus mBackupStatus;
+        private final PackageMeta mPackageMeta;
+        private final boolean mIsInstalled;
+        private final BackupStatus mBackupStatus;
 
         private BackupAppImpl(PackageMeta packageMeta, boolean isInstalled, BackupStatus backupStatus) {
             mPackageMeta = packageMeta;
@@ -484,9 +506,9 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     private static class BackupAppDetailsImpl implements BackupAppDetails {
 
-        private State mState;
-        private BackupApp mApp;
-        private List<Backup> mBackups;
+        private final State mState;
+        private final BackupApp mApp;
+        private final List<Backup> mBackups;
 
         private BackupAppDetailsImpl(State state, BackupApp app, List<Backup> backups) {
             mState = state;
@@ -512,7 +534,7 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
     private class LiveAppDetails extends LiveData<BackupAppDetails> implements Observer<List<Backup>>, AppsObserver {
 
-        private String mPkg;
+        private final String mPkg;
         private LiveData<List<Backup>> mMetasLiveData;
 
         private LiveAppDetails(String pkg) {
@@ -522,8 +544,9 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
         @Override
         protected void onActive() {
-            if (mMetasLiveData == null)
+            if (mMetasLiveData == null) {
                 mMetasLiveData = mIndex.getAllBackupsForPackageLiveData(mPkg);
+            }
 
             addAppsObserver(this);
             mMetasLiveData.observeForever(this);
@@ -551,15 +574,18 @@ public class DefaultBackupManager implements BackupManager, BackupStorage.Observ
 
         @Override
         public void onAppInvalidated(String pkg) {
-            if (pkg.equals(mPkg))
+            if (pkg.equals(mPkg)) {
                 invalidate();
+            }
         }
 
         private void invalidate() {
             mWorkerHandler.post(() -> {
                 BackupApp app = getApp(mPkg);
                 if (app != null) {
-                    postValue(new BackupAppDetailsImpl(BackupAppDetails.State.READY, getApp(mPkg), mIndex.getAllBackupsForPackage(mPkg)));
+                    postValue(new BackupAppDetailsImpl(BackupAppDetails.State.READY,
+                                                       getApp(mPkg),
+                                                       mIndex.getAllBackupsForPackage(mPkg)));
                 } else {
                     postValue(new BackupAppDetailsImpl(BackupAppDetails.State.ERROR, null, null));
                 }

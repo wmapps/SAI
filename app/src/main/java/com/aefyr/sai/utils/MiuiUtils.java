@@ -34,8 +34,9 @@ public class MiuiUtils {
             String[] versionParts = version.split("\\.");
             int[] intVersionParts = new int[versionParts.length];
 
-            for (int i = 0; i < versionParts.length; i++)
+            for (int i = 0; i < versionParts.length; i++) {
                 intVersionParts[i] = Integer.parseInt(versionParts[i]);
+            }
 
             return intVersionParts;
         } catch (Exception e) {
@@ -47,21 +48,25 @@ public class MiuiUtils {
      * @return 0 if versions are equal, values less than 0 if ver1 is lower than ver2, value more than 0 if ver1 is higher than ver2
      */
     private static int compareVersions(String version1, String version2) {
-        if (version1.equals(version2))
+        if (version1.equals(version2)) {
             return 0;
+        }
 
         int[] version1Parts = parseVersionIntoParts(version1);
         int[] version2Parts = parseVersionIntoParts(version2);
 
         for (int i = 0; i < version2Parts.length; i++) {
-            if (i >= version1Parts.length)
+            if (i >= version1Parts.length) {
                 return -1;
+            }
 
-            if (version1Parts[i] < version2Parts[i])
+            if (version1Parts[i] < version2Parts[i]) {
                 return -1;
+            }
 
-            if (version1Parts[i] > version2Parts[i])
+            if (version1Parts[i] > version2Parts[i]) {
                 return 1;
+            }
         }
 
         return 1;
@@ -73,13 +78,14 @@ public class MiuiUtils {
 
     @SuppressLint("PrivateApi")
     public static boolean isMiuiOptimizationDisabled() {
-        if ("0".equals(Utils.getSystemProperty("persist.sys.miui_optimization")))
+        if ("0".equals(Utils.getSystemProperty("persist.sys.miui_optimization"))) {
             return true;
+        }
 
         try {
             return (boolean) Class.forName("android.miui.AppOpsUtils")
-                    .getDeclaredMethod("isXOptMode")
-                    .invoke(null);
+                                  .getDeclaredMethod("isXOptMode")
+                                  .invoke(null);
         } catch (Exception e) {
             return false;
         }

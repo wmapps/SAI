@@ -13,11 +13,13 @@ import com.aefyr.sai.backup2.BackupComponent;
 @Entity(
         indices = {@Index(value = {"backup_uri"})},
         primaryKeys = {"backup_uri", "type"},
-        foreignKeys = {@ForeignKey(entity = BackupEntity.class,
-                parentColumns = {"uri"},
-                childColumns = {"backup_uri"},
-                onDelete = ForeignKey.CASCADE,
-                onUpdate = ForeignKey.CASCADE)}
+        foreignKeys = {
+                @ForeignKey(entity = BackupEntity.class,
+                        parentColumns = {"uri"},
+                        childColumns = {"backup_uri"},
+                        onDelete = ForeignKey.CASCADE,
+                        onUpdate = ForeignKey.CASCADE)
+        }
 )
 public class BackupComponentEntity implements BackupComponent {
 

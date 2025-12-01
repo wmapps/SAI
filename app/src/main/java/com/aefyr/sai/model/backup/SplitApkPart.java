@@ -6,9 +6,9 @@ import java.io.File;
 
 public class SplitApkPart {
 
-    private String mName;
-    private File mPath;
-    private long mSize;
+    private final String mName;
+    private final File mPath;
+    private final long mSize;
 
     public SplitApkPart(String name, File path) {
         mName = name;
@@ -30,7 +30,8 @@ public class SplitApkPart {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return obj instanceof SplitApkPart && ((SplitApkPart) obj).getPath().equals(getPath()) && ((SplitApkPart) obj).getName().equals(getName());
+        return obj instanceof SplitApkPart && ((SplitApkPart) obj).getPath().equals(getPath()) && ((SplitApkPart) obj).getName()
+                                                                                                                      .equals(getName());
     }
 
     @Override

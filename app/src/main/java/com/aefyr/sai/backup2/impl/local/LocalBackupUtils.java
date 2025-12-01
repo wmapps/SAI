@@ -24,11 +24,13 @@ public class LocalBackupUtils {
     private static final String TAG = "BackupUtils";
 
     /**
-     * @param c
-     * @param backupDirUri
-     * @param packageMeta
+     * Create backup file uri.
+     *
+     * @param c            the c
+     * @param backupDirUri the backup dir uri
+     * @param packageMeta  the package meta
      * @param apksFile     if true, created file will have .apks extension, otherwise - .apk
-     * @return
+     * @return the uri
      */
     @SuppressLint("DefaultLocale")
     @Nullable
@@ -49,7 +51,7 @@ public class LocalBackupUtils {
     @Nullable
     private static Uri createBackupUriViaFileIO(Context c, File backupsDir, PackageMeta packageMeta, String extension) {
         if (!backupsDir.exists() && !backupsDir.mkdir()) {
-            Log.e(TAG, "Unable to mkdir:" + backupsDir.toString());
+            Log.e(TAG, "Unable to mkdir:" + backupsDir);
             return null;
         }
 

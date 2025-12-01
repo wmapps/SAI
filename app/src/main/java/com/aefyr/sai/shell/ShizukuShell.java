@@ -31,8 +31,9 @@ public class ShizukuShell implements Shell {
 
     @Override
     public boolean isAvailable() {
-        if (!Shizuku.pingBinder())
+        if (!Shizuku.pingBinder()) {
             return false;
+        }
 
         try {
             return exec(new Command("echo", "test")).isSuccessful();
@@ -77,10 +78,11 @@ public class ShizukuShell implements Shell {
                     stdOutD.interrupt();
                     stdErrD.interrupt();
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         process.destroyForcibly();
-                    else
+                    } else {
                         process.destroy();
+                    }
 
                     throw new RuntimeException(e);
                 }
@@ -94,7 +96,10 @@ public class ShizukuShell implements Shell {
         } catch (Exception e) {
             Log.w(TAG, "Unable execute command: ");
             Log.w(TAG, e);
-            return new Result(command, -1, stdOutSb.toString().trim(), stdErrSb.toString() + "\n\n<!> SAI ShizukuShell Java exception: " + Utils.throwableToString(e));
+            return new Result(command,
+                              -1,
+                              stdOutSb.toString().trim(),
+                              stdErrSb + "\n\n<!> SAI ShizukuShell Java exception: " + Utils.throwableToString(e));
         }
     }
 }

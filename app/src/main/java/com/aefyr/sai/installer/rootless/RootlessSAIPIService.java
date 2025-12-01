@@ -34,18 +34,25 @@ public class RootlessSAIPIService extends Service {
         switch (status) {
             case PackageInstaller.STATUS_PENDING_USER_ACTION:
                 Log.d(TAG, "Requesting user confirmation for installation");
-                sendStatusChangeBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1), STATUS_CONFIRMATION_PENDING, intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME));
+                sendStatusChangeBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1),
+                                          STATUS_CONFIRMATION_PENDING,
+                                          intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME));
                 Intent confirmationIntent = intent.getParcelableExtra(Intent.EXTRA_INTENT);
 
-                ConfirmationIntentWrapperActivity.start(this, intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1), confirmationIntent);
+                ConfirmationIntentWrapperActivity.start(this,
+                                                        intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1),
+                                                        confirmationIntent);
                 break;
             case PackageInstaller.STATUS_SUCCESS:
                 Log.d(TAG, "Installation succeed");
-                sendStatusChangeBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1), STATUS_SUCCESS, intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME));
+                sendStatusChangeBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1),
+                                          STATUS_SUCCESS,
+                                          intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME));
                 break;
             default:
                 Log.d(TAG, "Installation failed");
-                sendErrorBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1), getErrorString(status, intent.getStringExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME)));
+                sendErrorBroadcast(intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1),
+                                   getErrorString(status, intent.getStringExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME)));
                 break;
         }
         stopSelf();
@@ -57,8 +64,9 @@ public class RootlessSAIPIService extends Service {
         statusIntent.putExtra(EXTRA_INSTALLATION_STATUS, status);
         statusIntent.putExtra(EXTRA_SESSION_ID, sessionID);
 
-        if (packageName != null)
+        if (packageName != null) {
             statusIntent.putExtra(EXTRA_PACKAGE_NAME, packageName);
+        }
 
         sendBroadcast(statusIntent);
     }
@@ -81,8 +89,9 @@ public class RootlessSAIPIService extends Service {
                 String blocker = getString(R.string.installer_error_blocked_device);
                 if (blockingPackage != null) {
                     String appLabel = Utils.getAppLabel(getApplicationContext(), blockingPackage);
-                    if (appLabel != null)
+                    if (appLabel != null) {
                         blocker = appLabel;
+                    }
                 }
                 return getString(R.string.installer_error_blocked, blocker);
 

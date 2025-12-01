@@ -17,8 +17,8 @@ import java.io.OutputStream;
  */
 public class CopyToFileApkSource implements ApkSource {
 
-    private Context mContext;
-    private ApkSource mWrappedApkSource;
+    private final Context mContext;
+    private final ApkSource mWrappedApkSource;
 
     private File mTempDir;
     private File mCurrentApkFile;
@@ -30,14 +30,17 @@ public class CopyToFileApkSource implements ApkSource {
 
     @Override
     public boolean nextApk() throws Exception {
-        if (!mWrappedApkSource.nextApk())
+        if (!mWrappedApkSource.nextApk()) {
             return false;
+        }
 
-        if (mTempDir == null)
+        if (mTempDir == null) {
             mTempDir = createTempDir();
+        }
 
-        if (mCurrentApkFile != null)
+        if (mCurrentApkFile != null) {
             IOUtils.deleteRecursively(mCurrentApkFile);
+        }
 
 
         mCurrentApkFile = new File(mTempDir, mWrappedApkSource.getApkName());
@@ -82,8 +85,9 @@ public class CopyToFileApkSource implements ApkSource {
             IOUtils.deleteRecursively(mTempDir);
         }
 
-        if (suppressedException != null)
+        if (suppressedException != null) {
             throw suppressedException;
+        }
     }
 
     @Nullable
